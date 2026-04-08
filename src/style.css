@@ -192,6 +192,11 @@ body {
   letter-spacing: 0.03em;
 }
 
+.verify-result strong {
+  font-size: 1.2rem;
+  margin-right: 0.3rem;
+}
+
 .verify-result.valid {
   color: var(--valid);
 }
@@ -220,6 +225,72 @@ body {
   margin: 0.7rem 0 0;
   line-height: 1.55;
   color: var(--text-muted);
+}
+
+.tampered-byte {
+  background: rgba(201, 37, 54, 0.2);
+  color: var(--invalid);
+  border-radius: 4px;
+  padding: 0 1px;
+}
+
+.info-panel {
+  background: var(--bg-elevated);
+  border: 1px solid var(--line);
+  border-radius: 18px;
+  padding: 1rem;
+  box-shadow: var(--shadow);
+}
+
+.tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.55rem;
+}
+
+.tab-btn {
+  width: auto;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--bg-surface);
+  color: var(--text);
+  padding: 0.45rem 0.75rem;
+  cursor: pointer;
+}
+
+.tab-btn.active {
+  border-color: var(--accent-strong);
+  color: #fff;
+  background: var(--accent);
+}
+
+.tab-panel {
+  margin-top: 0.95rem;
+}
+
+.tab-panel h3 {
+  margin: 0 0 0.45rem;
+  font-size: 1.06rem;
+}
+
+.tab-panel p {
+  margin: 0;
+  color: var(--text-muted);
+  line-height: 1.55;
+}
+
+.tab-panel a {
+  color: var(--accent-strong);
+}
+
+.ascii-diagram {
+  margin: 0.85rem 0 0;
+  padding: 0.75rem;
+  border-radius: 12px;
+  border: 1px solid var(--line);
+  background: var(--bg-surface);
+  color: var(--text);
+  overflow: auto;
 }
 
 @media (max-width: 980px) {
