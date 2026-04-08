@@ -172,6 +172,14 @@ export function mountApp(): void {
           <p>Ed25519 appears in Signal, SSH (OpenSSH defaults since 2014), TLS 1.3 deployments, WireGuard tooling, Zcash-related systems, and the age encryption tool. Ethereum account signatures use secp256k1, while consensus-layer cryptography in adjacent ecosystems often involves BLS-style primitives.</p>
         </article>
       </section>
+
+      <section class="related-links" aria-label="Related crypto-lab demos">
+        <h3>Explore Related Demos</h3>
+        <a href="https://systemslibrarian.github.io/crypto-lab-rsa-forge/" target="_blank" rel="noreferrer">rsa-forge</a>
+        <a href="https://systemslibrarian.github.io/crypto-lab-dilithium-seal/" target="_blank" rel="noreferrer">dilithium-seal</a>
+        <a href="https://systemslibrarian.github.io/crypto-lab-curve-lens/" target="_blank" rel="noreferrer">curve-lens</a>
+        <a href="https://systemslibrarian.github.io/crypto-lab-frost-threshold/" target="_blank" rel="noreferrer">frost-threshold</a>
+      </section>
     </main>
   `;
 
