@@ -6,7 +6,7 @@ import {
   type Keypair,
 } from './forge';
 
-const THEME_STORAGE_KEY = 'ed25519-forge-theme';
+const THEME_STORAGE_KEY = 'theme';
 
 function toRawHex(bytes: Uint8Array): string {
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('').toUpperCase();
@@ -81,7 +81,7 @@ export function mountApp(): void {
     <main class="lab-shell" aria-live="polite">
       <header class="lab-topbar">
         <a class="portfolio-badge" href="https://systemslibrarian.github.io/crypto-lab/" target="_blank" rel="noreferrer">crypto-lab portfolio</a>
-        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Toggle dark and light mode">☀️ / 🌙</button>
+        <button id="theme-toggle" class="theme-toggle" type="button" style="position: absolute; top: 0; right: 0;" aria-label="Switch to light mode">🌙</button>
       </header>
 
       <section class="hero-copy">
@@ -253,14 +253,25 @@ export function mountApp(): void {
     copySignatureButton.disabled = currentSignature === null;
   };
 
-  const initialTheme = localStorage.getItem(THEME_STORAGE_KEY) ?? 'dark';
-  document.documentElement.dataset.theme = initialTheme;
+  const syncToggle = (): void => {
+    const current = document.documentElement.getAttribute('data-theme') ?? 'dark';
+    if (current === 'dark') {
+      themeToggle.textContent = '🌙';
+      themeToggle.setAttribute('aria-label', 'Switch to light mode');
+    } else {
+      themeToggle.textContent = '☀️';
+      themeToggle.setAttribute('aria-label', 'Switch to dark mode');
+    }
+  };
 
-  themeToggle?.addEventListener('click', () => {
-    const current = document.documentElement.dataset.theme ?? 'dark';
+  syncToggle();
+
+  themeToggle.addEventListener('click', () => {
+    const current = document.documentElement.getAttribute('data-theme') ?? 'dark';
     const nextTheme = current === 'dark' ? 'light' : 'dark';
-    document.documentElement.dataset.theme = nextTheme;
+    document.documentElement.setAttribute('data-theme', nextTheme);
     localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
+    syncToggle();
   });
 
   generateButton.addEventListener('click', () => {
