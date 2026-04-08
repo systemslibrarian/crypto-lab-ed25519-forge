@@ -139,7 +139,7 @@ export function mountApp(): void {
 
       <details class="why-matters" id="why-matters">
         <summary>Why this matters</summary>
-        <p>Ed25519 avoids the catastrophic nonce-reuse failures that historically exposed private keys in ECDSA systems.</p>
+        <p>Most signature schemes require a random nonce per signature. If that RNG fails - even once - your private key is exposed. Ed25519 eliminates this entire class of failure by deriving the nonce deterministically from the private key and message. Sony's PlayStation 3 was broken because their ECDSA implementation used a constant nonce. Ed25519 makes that mistake structurally impossible.</p>
       </details>
 
       <section class="info-panel">
@@ -151,25 +151,25 @@ export function mountApp(): void {
         </div>
         <article id="tab-1" class="tab-panel active" role="tabpanel">
           <h3>Ed25519 vs ECDSA</h3>
-          <p>Ed25519 derives nonces deterministically from key+message, removing RNG failure as a key-leak vector. It uses cofactor-aware Edwards arithmetic, supports batch verification in many workflows, and typically verifies around 2x faster than P-256 ECDSA in practical libraries. Ed25519 signatures are fixed 64 bytes, unlike DER-encoded ECDSA signatures with variable length.</p>
+          <p>Ed25519 uses deterministic nonces, derived from private key material and message, so nonce RNG failure cannot expose keys the way bad ECDSA nonce generation can. Its group has cofactor = 8, which affects validation rules and small-subgroup edge cases. Ed25519 is commonly batch-verified, often verifies around 2x faster than P-256 ECDSA in practical stacks, and always outputs compact 64-byte signatures (instead of variable-length DER encoding).</p>
         </article>
         <article id="tab-2" class="tab-panel" role="tabpanel" hidden>
           <h3>The Math</h3>
-          <p>Ed25519 uses a Twisted Edwards curve over the prime field of size roughly 2^255. Private scalars multiply a fixed base point G to get the public key. Scalar multiplication is repeated point addition and doubling.</p>
+          <p>Ed25519 is built on a Twisted Edwards curve using the form ax^2 + y^2 = 1 + dx^2y^2 over a prime field Fp with about 255 bits. The base point G is fixed; your private scalar multiplies G to produce the public point. Scalar multiplication is repeated point addition and doubling, which is why efficient point formulas matter. The field size drives the Curve25519 naming.</p>
           <pre class="ascii-diagram">P + Q = R
-   P o----\
-          \  chord/tangent rule
-           \____ o R
-          /
-   Q o---/</pre>
+   P o-----\
+            \  combine slopes
+             \___ o R
+             /
+   Q o------/</pre>
         </article>
         <article id="tab-3" class="tab-panel" role="tabpanel" hidden>
           <h3>Pitfalls & ZIP215</h3>
-          <p>Historically, libraries disagreed on edge-case point validation and cofactor handling. That meant one implementation could accept a signature another rejected. ZIP215 standardized consensus-friendly Ed25519 verification behavior to avoid chain splits and cross-library mismatch hazards seen in ecosystems like Monero. Reference: <a href="https://zips.z.cash/zip-0215" target="_blank" rel="noreferrer">ZIP-0215</a>.</p>
+          <p>Before ZIP215-aligned behavior, signature acceptance around edge cases and cofactor clearing could vary by library, enabling practical malleability and consensus disagreement risks. Verifying the same signature in two different libraries could produce conflicting outcomes. Monero was impacted by this class of ambiguity. ZIP215 standardized consensus-safe verification behavior so implementations agree. Reference: <a href="https://zips.z.cash/zip-0215" target="_blank" rel="noreferrer">ZIP-0215</a>.</p>
         </article>
         <article id="tab-4" class="tab-panel" role="tabpanel" hidden>
           <h3>Where It's Used</h3>
-          <p>Ed25519 appears in Signal, SSH (OpenSSH defaults), TLS 1.3 suites, WireGuard tooling, Zcash contexts, and age. Ethereum account signatures use secp256k1, but neighboring consensus systems often use BLS families.</p>
+          <p>Ed25519 appears in Signal, SSH (OpenSSH defaults since 2014), TLS 1.3 deployments, WireGuard tooling, Zcash-related systems, and the age encryption tool. Ethereum account signatures use secp256k1, while consensus-layer cryptography in adjacent ecosystems often involves BLS-style primitives.</p>
         </article>
       </section>
     </main>
