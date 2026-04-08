@@ -81,7 +81,7 @@ export function mountApp(): void {
     <main class="lab-shell" aria-live="polite">
       <header class="lab-topbar">
         <a class="portfolio-badge" href="https://systemslibrarian.github.io/crypto-lab/" target="_blank" rel="noreferrer">crypto-lab portfolio</a>
-        <button id="theme-toggle" class="theme-toggle" type="button" style="position: absolute; top: 0; right: 0;" aria-label="Switch to light mode">🌙</button>
+        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to light mode">🌙</button>
       </header>
 
       <section class="hero-copy">
@@ -95,12 +95,12 @@ export function mountApp(): void {
           <button id="generate-keypair" type="button">Generate Keypair</button>
           <div class="field-stack">
             <label for="private-key-display">Private Key (truncated hex)</label>
-            <output id="private-key-display" class="mono block">-</output>
+            <output id="private-key-display" class="mono block" aria-live="polite">-</output>
             <small>32-byte private scalar - never fully displayed in UI</small>
           </div>
           <div class="field-stack">
             <label for="public-key-display">Public Key (hex)</label>
-            <output id="public-key-display" class="mono block">-</output>
+            <output id="public-key-display" class="mono block" aria-live="polite">-</output>
             <button id="copy-public-key" type="button" disabled>Copy Public Key</button>
             <small>32-byte private scalar -> 32-byte compressed point on Curve25519</small>
           </div>
@@ -113,7 +113,7 @@ export function mountApp(): void {
           <button id="sign-message-btn" type="button" disabled>Sign Message</button>
           <div class="field-stack">
             <label for="signature-display">Signature (hex)</label>
-            <output id="signature-display" class="mono block scroll">-</output>
+            <output id="signature-display" class="mono block scroll" aria-live="polite">-</output>
             <button id="copy-signature" type="button" disabled>Copy Signature</button>
             <small>64 bytes (R: 32 || S: 32)</small>
           </div>
@@ -131,7 +131,7 @@ export function mountApp(): void {
             <button id="verify-btn" type="button" disabled>Verify ✓</button>
             <button id="tamper-verify-btn" type="button" disabled>Tamper & Verify ✗</button>
           </div>
-          <div id="verify-result" class="verify-result neutral">
+          <div id="verify-result" class="verify-result neutral" role="status" aria-live="polite">
             Awaiting keypair, signature, and verification input.
           </div>
         </article>
@@ -144,16 +144,16 @@ export function mountApp(): void {
 
       <section class="info-panel">
         <div class="tabs" role="tablist" aria-label="Ed25519 educational tabs">
-          <button class="tab-btn active" data-tab="tab-1" role="tab" aria-selected="true" aria-controls="tab-1">Ed25519 vs ECDSA</button>
-          <button class="tab-btn" data-tab="tab-2" role="tab" aria-selected="false" aria-controls="tab-2">The Math</button>
-          <button class="tab-btn" data-tab="tab-3" role="tab" aria-selected="false" aria-controls="tab-3">Pitfalls & ZIP215</button>
-          <button class="tab-btn" data-tab="tab-4" role="tab" aria-selected="false" aria-controls="tab-4">Where It's Used</button>
+          <button id="tab-btn-1" class="tab-btn active" data-tab="tab-1" role="tab" aria-selected="true" aria-controls="tab-1">Ed25519 vs ECDSA</button>
+          <button id="tab-btn-2" class="tab-btn" data-tab="tab-2" role="tab" aria-selected="false" aria-controls="tab-2">The Math</button>
+          <button id="tab-btn-3" class="tab-btn" data-tab="tab-3" role="tab" aria-selected="false" aria-controls="tab-3">Pitfalls & ZIP215</button>
+          <button id="tab-btn-4" class="tab-btn" data-tab="tab-4" role="tab" aria-selected="false" aria-controls="tab-4">Where It's Used</button>
         </div>
-        <article id="tab-1" class="tab-panel active" role="tabpanel">
+        <article id="tab-1" class="tab-panel active" role="tabpanel" aria-labelledby="tab-btn-1">
           <h3>Ed25519 vs ECDSA</h3>
           <p>Ed25519 uses deterministic nonces, derived from private key material and message, so nonce RNG failure cannot expose keys the way bad ECDSA nonce generation can. Its group has cofactor = 8, which affects validation rules and small-subgroup edge cases. Ed25519 is commonly batch-verified, often verifies around 2x faster than P-256 ECDSA in practical stacks, and always outputs compact 64-byte signatures (instead of variable-length DER encoding).</p>
         </article>
-        <article id="tab-2" class="tab-panel" role="tabpanel" hidden>
+        <article id="tab-2" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-2" hidden>
           <h3>The Math</h3>
           <p>Ed25519 is built on a Twisted Edwards curve using the form ax^2 + y^2 = 1 + dx^2y^2 over a prime field Fp with about 255 bits. The base point G is fixed; your private scalar multiplies G to produce the public point. Scalar multiplication is repeated point addition and doubling, which is why efficient point formulas matter. The field size drives the Curve25519 naming.</p>
           <pre class="ascii-diagram">P + Q = R
@@ -163,11 +163,11 @@ export function mountApp(): void {
              /
    Q o------/</pre>
         </article>
-        <article id="tab-3" class="tab-panel" role="tabpanel" hidden>
+        <article id="tab-3" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-3" hidden>
           <h3>Pitfalls & ZIP215</h3>
           <p>Before ZIP215-aligned behavior, signature acceptance around edge cases and cofactor clearing could vary by library, enabling practical malleability and consensus disagreement risks. Verifying the same signature in two different libraries could produce conflicting outcomes. Monero was impacted by this class of ambiguity. ZIP215 standardized consensus-safe verification behavior so implementations agree. Reference: <a href="https://zips.z.cash/zip-0215" target="_blank" rel="noreferrer">ZIP-0215</a>.</p>
         </article>
-        <article id="tab-4" class="tab-panel" role="tabpanel" hidden>
+        <article id="tab-4" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-4" hidden>
           <h3>Where It's Used</h3>
           <p>Ed25519 appears in Signal, SSH (OpenSSH defaults since 2014), TLS 1.3 deployments, WireGuard tooling, Zcash-related systems, and the age encryption tool. Ethereum account signatures use secp256k1, while consensus-layer cryptography in adjacent ecosystems often involves BLS-style primitives.</p>
         </article>
@@ -392,25 +392,44 @@ export function mountApp(): void {
 
   const tabButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.tab-btn'));
   const tabPanels = Array.from(document.querySelectorAll<HTMLElement>('.tab-panel'));
+
+  const activateTab = (tabButton: HTMLButtonElement): void => {
+    const targetTab = tabButton.dataset.tab;
+    if (!targetTab) return;
+    for (const button of tabButtons) {
+      const selected = button === tabButton;
+      button.classList.toggle('active', selected);
+      button.setAttribute('aria-selected', selected ? 'true' : 'false');
+      button.setAttribute('tabindex', selected ? '0' : '-1');
+    }
+    for (const panel of tabPanels) {
+      const isTarget = panel.id === targetTab;
+      panel.classList.toggle('active', isTarget);
+      panel.hidden = !isTarget;
+    }
+    tabButton.focus();
+  };
+
   for (const tabButton of tabButtons) {
-    tabButton.addEventListener('click', () => {
-      const targetTab = tabButton.dataset.tab;
-      if (!targetTab) {
-        return;
-      }
+    tabButton.addEventListener('click', () => activateTab(tabButton));
 
-      for (const button of tabButtons) {
-        const selected = button === tabButton;
-        button.classList.toggle('active', selected);
-        button.setAttribute('aria-selected', selected ? 'true' : 'false');
-      }
-
-      for (const panel of tabPanels) {
-        const isTarget = panel.id === targetTab;
-        panel.classList.toggle('active', isTarget);
-        panel.hidden = !isTarget;
+    tabButton.addEventListener('keydown', (e: KeyboardEvent) => {
+      const idx = tabButtons.indexOf(tabButton);
+      let next = -1;
+      if (e.key === 'ArrowRight') next = (idx + 1) % tabButtons.length;
+      else if (e.key === 'ArrowLeft') next = (idx - 1 + tabButtons.length) % tabButtons.length;
+      else if (e.key === 'Home') next = 0;
+      else if (e.key === 'End') next = tabButtons.length - 1;
+      if (next >= 0) {
+        e.preventDefault();
+        activateTab(tabButtons[next]);
       }
     });
+  }
+
+  // Set initial tabindex: only active tab is in tab order
+  for (const button of tabButtons) {
+    button.setAttribute('tabindex', button.classList.contains('active') ? '0' : '-1');
   }
 
   refreshButtons();
