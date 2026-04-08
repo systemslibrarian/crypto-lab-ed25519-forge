@@ -78,7 +78,7 @@ export function mountApp(): void {
   }
 
   root.innerHTML = `
-    <main class="lab-shell" aria-live="polite">
+    <main class="lab-shell">
       <header class="lab-topbar">
         <a class="portfolio-badge" href="https://systemslibrarian.github.io/crypto-lab/" target="_blank" rel="noreferrer">crypto-lab portfolio</a>
         <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to light mode">🌙</button>
@@ -322,12 +322,16 @@ export function mountApp(): void {
       return;
     }
 
-    const valid = verifySignature(msg, sig, pub);
-    signatureDisplay.textContent = toGroupedHex(sig);
-    if (valid) {
-      setResult('VALID', 'Signature matches message and public key.');
-    } else {
-      setResult('INVALID', 'Signature does not match the supplied message/public key.');
+    try {
+      const valid = verifySignature(msg, sig, pub);
+      signatureDisplay.textContent = toGroupedHex(sig);
+      if (valid) {
+        setResult('VALID', 'Signature matches message and public key.');
+      } else {
+        setResult('INVALID', 'Signature does not match the supplied message/public key.');
+      }
+    } catch {
+      setResult('INVALID', 'Verification failed: invalid key or signature format.');
     }
     refreshButtons();
   });
@@ -352,13 +356,17 @@ export function mountApp(): void {
       return;
     }
 
-    const valid = verifySignature(msg, tampered, pub);
-    verifySignatureInput.value = toRawHex(tampered);
-    signatureDisplay.innerHTML = toGroupedHexHtml(tampered, 32);
-    if (!valid) {
-      setResult('INVALID', 'Tampered byte at index 32 invalidated the signature.');
-    } else {
-      setResult('VALID', 'Unexpectedly valid after tampering. Check inputs carefully.');
+    try {
+      const valid = verifySignature(msg, tampered, pub);
+      verifySignatureInput.value = toRawHex(tampered);
+      signatureDisplay.innerHTML = toGroupedHexHtml(tampered, 32);
+      if (!valid) {
+        setResult('INVALID', 'Tampered byte at index 32 invalidated the signature.');
+      } else {
+        setResult('VALID', 'Unexpectedly valid after tampering. Check inputs carefully.');
+      }
+    } catch {
+      setResult('INVALID', 'Verification failed: invalid key or signature format.');
     }
     refreshButtons();
   });
@@ -368,8 +376,12 @@ export function mountApp(): void {
       return;
     }
 
-    await navigator.clipboard.writeText(toRawHex(activeKeypair.publicKey));
-    withCopiedState(copyPublicButton, 'Copy Public Key');
+    try {
+      await navigator.clipboard.writeText(toRawHex(activeKeypair.publicKey));
+      withCopiedState(copyPublicButton, 'Copy Public Key');
+    } catch {
+      /* clipboard unavailable */
+    }
   });
 
   copySignatureButton.addEventListener('click', async () => {
@@ -377,8 +389,12 @@ export function mountApp(): void {
       return;
     }
 
-    await navigator.clipboard.writeText(toRawHex(currentSignature));
-    withCopiedState(copySignatureButton, 'Copy Signature');
+    try {
+      await navigator.clipboard.writeText(toRawHex(currentSignature));
+      withCopiedState(copySignatureButton, 'Copy Signature');
+    } catch {
+      /* clipboard unavailable */
+    }
   });
 
   signMessageInput.addEventListener('input', () => {
