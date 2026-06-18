@@ -1,26 +1,30 @@
 import './style.css';
-import {
-	generateKeypair,
-	signMessage,
-	tamperSignature,
-	verifySignature,
-} from './forge';
 import { mountApp } from './ui';
 
-const phase2Message = 'Hello, Ed25519';
-const keypair = generateKeypair();
-const signResult = signMessage(phase2Message, keypair.privateKey);
-const isValid = verifySignature(phase2Message, signResult.signature, keypair.publicKey);
-const tampered = tamperSignature(signResult.signature);
-const isTamperedValid = verifySignature(phase2Message, tampered, keypair.publicKey);
-
-console.group('Phase 2 Ed25519 Console Test');
-console.log('message:', phase2Message);
-console.log('privateKeyLength:', keypair.privateKey.length);
-console.log('publicKeyLength:', keypair.publicKey.length);
-console.log('signatureLength:', signResult.signature.length);
-console.log('verify(original):', isValid);
-console.log('verify(tampered):', isTamperedValid);
-console.groupEnd();
-
 mountApp();
+
+// Dev-only self-test: confirms the crypto primitives round-trip and that a
+// tampered signature fails. Stripped from production builds, and dynamically
+// imported so @noble/curves never touches the production entry chunk.
+if (import.meta.env.DEV) {
+  void (async () => {
+    const { generateKeypair, signMessage, tamperSignature, verifySignature } = await import(
+      './forge'
+    );
+    const message = 'Hello, Ed25519';
+    const keypair = generateKeypair();
+    const signResult = signMessage(message, keypair.privateKey);
+    const isValid = verifySignature(message, signResult.signature, keypair.publicKey);
+    const tampered = tamperSignature(signResult.signature);
+    const isTamperedValid = verifySignature(message, tampered, keypair.publicKey);
+
+    console.group('Ed25519 self-test');
+    console.log('message:', message);
+    console.log('privateKeyLength:', keypair.privateKey.length);
+    console.log('publicKeyLength:', keypair.publicKey.length);
+    console.log('signatureLength:', signResult.signature.length);
+    console.log('verify(original):', isValid);
+    console.log('verify(tampered):', isTamperedValid);
+    console.groupEnd();
+  })();
+}

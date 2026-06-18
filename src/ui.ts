@@ -1,12 +1,13 @@
-import {
-  generateKeypair,
-  signMessage,
-  tamperSignature,
-  verifySignature,
-  type Keypair,
-} from './forge';
+import type { Keypair } from './forge';
 
 const THEME_STORAGE_KEY = 'theme';
+
+// Lazy-load the crypto module (which pulls in @noble/curves) so it is kept off
+// the initial critical path. It is fetched on first interaction intent and
+// cached, so the first click resolves instantly.
+type ForgeModule = typeof import('./forge');
+let forgePromise: Promise<ForgeModule> | null = null;
+const loadForge = (): Promise<ForgeModule> => (forgePromise ??= import('./forge'));
 
 function toRawHex(bytes: Uint8Array): string {
   return Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('').toUpperCase();
@@ -72,117 +73,6 @@ function withCopiedState(button: HTMLButtonElement, baseText: string): void {
 }
 
 export function mountApp(): void {
-  const root = document.querySelector<HTMLDivElement>('#app');
-  if (!root) {
-    throw new Error('Missing #app root element');
-  }
-
-  root.innerHTML = `
-    <main class="lab-shell">
-      <header class="lab-topbar">
-        <a class="portfolio-badge" href="https://systemslibrarian.github.io/crypto-lab/" target="_blank" rel="noreferrer">crypto-lab portfolio</a>
-        <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to light mode">🌙</button>
-      </header>
-
-      <section class="hero-copy">
-        <h1>Ed25519 Forge</h1>
-        <p>Interactive key generation, deterministic signing, and verification on Curve25519.</p>
-      </section>
-
-      <section class="panel-grid">
-        <article class="panel" id="panel-key-forge">
-          <h2>Panel A - KEY FORGE</h2>
-          <button id="generate-keypair" type="button">Generate Keypair</button>
-          <div class="field-stack">
-            <label for="private-key-display">Private Key (truncated hex)</label>
-            <output id="private-key-display" class="mono block" aria-live="polite">-</output>
-            <small>32-byte private scalar - never fully displayed in UI</small>
-          </div>
-          <div class="field-stack">
-            <label for="public-key-display">Public Key (hex)</label>
-            <output id="public-key-display" class="mono block" aria-live="polite">-</output>
-            <button id="copy-public-key" type="button" disabled>Copy Public Key</button>
-            <small>32-byte private scalar -> 32-byte compressed point on Curve25519</small>
-          </div>
-        </article>
-
-        <article class="panel" id="panel-sign">
-          <h2>Panel B - SIGN</h2>
-          <label for="sign-message">Message</label>
-          <textarea id="sign-message" rows="5">The nonce never repeats.</textarea>
-          <button id="sign-message-btn" type="button" disabled>Sign Message</button>
-          <div class="field-stack">
-            <label for="signature-display">Signature (hex)</label>
-            <output id="signature-display" class="mono block scroll" aria-live="polite">-</output>
-            <button id="copy-signature" type="button" disabled>Copy Signature</button>
-            <small>64 bytes (R: 32 || S: 32)</small>
-          </div>
-        </article>
-
-        <article class="panel" id="panel-verify">
-          <h2>Panel C - VERIFY</h2>
-          <label for="verify-public-key">Public Key</label>
-          <textarea id="verify-public-key" class="mono" rows="3" placeholder="Hex public key"></textarea>
-          <label for="verify-message">Message</label>
-          <textarea id="verify-message" rows="4" placeholder="Message to verify"></textarea>
-          <label for="verify-signature">Signature</label>
-          <textarea id="verify-signature" class="mono" rows="4" placeholder="Hex signature"></textarea>
-          <div class="verify-actions">
-            <button id="verify-btn" type="button" disabled>Verify ✓</button>
-            <button id="tamper-verify-btn" type="button" disabled>Tamper & Verify ✗</button>
-          </div>
-          <div id="verify-result" class="verify-result neutral" role="status" aria-live="polite">
-            Awaiting keypair, signature, and verification input.
-          </div>
-        </article>
-      </section>
-
-      <details class="why-matters" id="why-matters">
-        <summary>Why this matters</summary>
-        <p>Most signature schemes require a random nonce per signature. If that RNG fails - even once - your private key is exposed. Ed25519 eliminates this entire class of failure by deriving the nonce deterministically from the private key and message. Sony's PlayStation 3 was broken because their ECDSA implementation used a constant nonce. Ed25519 makes that mistake structurally impossible.</p>
-      </details>
-
-      <section class="info-panel">
-        <div class="tabs" role="tablist" aria-label="Ed25519 educational tabs">
-          <button id="tab-btn-1" class="tab-btn active" data-tab="tab-1" role="tab" aria-selected="true" aria-controls="tab-1">Ed25519 vs ECDSA</button>
-          <button id="tab-btn-2" class="tab-btn" data-tab="tab-2" role="tab" aria-selected="false" aria-controls="tab-2">The Math</button>
-          <button id="tab-btn-3" class="tab-btn" data-tab="tab-3" role="tab" aria-selected="false" aria-controls="tab-3">Pitfalls & ZIP215</button>
-          <button id="tab-btn-4" class="tab-btn" data-tab="tab-4" role="tab" aria-selected="false" aria-controls="tab-4">Where It's Used</button>
-        </div>
-        <article id="tab-1" class="tab-panel active" role="tabpanel" aria-labelledby="tab-btn-1">
-          <h3>Ed25519 vs ECDSA</h3>
-          <p>Ed25519 uses deterministic nonces, derived from private key material and message, so nonce RNG failure cannot expose keys the way bad ECDSA nonce generation can. Its group has cofactor = 8, which affects validation rules and small-subgroup edge cases. Ed25519 is commonly batch-verified, often verifies around 2x faster than P-256 ECDSA in practical stacks, and always outputs compact 64-byte signatures (instead of variable-length DER encoding).</p>
-        </article>
-        <article id="tab-2" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-2" hidden>
-          <h3>The Math</h3>
-          <p>Ed25519 is built on a Twisted Edwards curve using the form ax^2 + y^2 = 1 + dx^2y^2 over a prime field Fp with about 255 bits. The base point G is fixed; your private scalar multiplies G to produce the public point. Scalar multiplication is repeated point addition and doubling, which is why efficient point formulas matter. The field size drives the Curve25519 naming.</p>
-          <pre class="ascii-diagram">P + Q = R
-   P o-----\
-            \  combine slopes
-             \___ o R
-             /
-   Q o------/</pre>
-        </article>
-        <article id="tab-3" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-3" hidden>
-          <h3>Pitfalls & ZIP215</h3>
-          <p>Before ZIP215-aligned behavior, signature acceptance around edge cases and cofactor clearing could vary by library, enabling practical malleability and consensus disagreement risks. Verifying the same signature in two different libraries could produce conflicting outcomes. Monero was impacted by this class of ambiguity. ZIP215 standardized consensus-safe verification behavior so implementations agree. Reference: <a href="https://zips.z.cash/zip-0215" target="_blank" rel="noreferrer">ZIP-0215</a>.</p>
-        </article>
-        <article id="tab-4" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-4" hidden>
-          <h3>Where It's Used</h3>
-          <p>Ed25519 appears in Signal, SSH (OpenSSH defaults since 2014), TLS 1.3 deployments, WireGuard tooling, Zcash-related systems, and the age encryption tool. Ethereum account signatures use secp256k1, while consensus-layer cryptography in adjacent ecosystems often involves BLS-style primitives.</p>
-        </article>
-      </section>
-
-      <section class="related-links" aria-label="Related crypto-lab demos">
-        <h3>Explore Related Demos</h3>
-        <a href="https://systemslibrarian.github.io/crypto-lab-rsa-forge/" target="_blank" rel="noreferrer">rsa-forge</a>
-        <a href="https://systemslibrarian.github.io/crypto-lab-dilithium-seal/" target="_blank" rel="noreferrer">dilithium-seal</a>
-        <a href="https://systemslibrarian.github.io/crypto-lab-curve-lens/" target="_blank" rel="noreferrer">curve-lens</a>
-        <a href="https://systemslibrarian.github.io/crypto-lab-frost-threshold/" target="_blank" rel="noreferrer">frost-threshold</a>
-      </section>
-    </main>
-  `;
-
   const themeToggle = document.querySelector<HTMLButtonElement>('#theme-toggle');
   const privateKeyDisplay = document.querySelector<HTMLOutputElement>('#private-key-display');
   const publicKeyDisplay = document.querySelector<HTMLOutputElement>('#public-key-display');
@@ -221,47 +111,68 @@ export function mountApp(): void {
     throw new Error('Expected UI element missing from DOM');
   }
 
+  const srStatus = document.querySelector<HTMLDivElement>('#sr-status');
+  const themeIcon = themeToggle.querySelector<HTMLSpanElement>('.theme-toggle-icon');
+
   let activeKeypair: Keypair | null = null;
   let currentSignature: Uint8Array | null = null;
+
+  // Concise, screen-reader-only announcer. Avoids reading long hex strings aloud
+  // via the output elements' implicit live regions (those are set to aria-live="off").
+  const announce = (message: string): void => {
+    if (!srStatus) return;
+    srStatus.textContent = '';
+    // Re-assign on the next frame so repeated identical messages still announce.
+    requestAnimationFrame(() => {
+      srStatus.textContent = message;
+    });
+  };
 
   const setResult = (label: 'VALID' | 'INVALID' | 'NEUTRAL', reason: string): void => {
     verifyResult.classList.remove('valid', 'invalid', 'neutral');
     if (label === 'VALID') {
       verifyResult.classList.add('valid');
-      verifyResult.innerHTML = `<strong>VALID</strong> - ${reason}`;
+      verifyResult.innerHTML = `<span class="result-icon" aria-hidden="true">✓</span><strong>VALID</strong> — ${reason}`;
+      announce(`Valid. ${reason}`);
       return;
     }
     if (label === 'INVALID') {
       verifyResult.classList.add('invalid');
-      verifyResult.innerHTML = `<strong>INVALID</strong> - ${reason}`;
+      verifyResult.innerHTML = `<span class="result-icon" aria-hidden="true">✗</span><strong>INVALID</strong> — ${reason}`;
+      announce(`Invalid. ${reason}`);
       return;
     }
 
     verifyResult.classList.add('neutral');
     verifyResult.textContent = reason;
+    announce(reason);
   };
 
   const refreshButtons = (): void => {
     signButton.disabled = activeKeypair === null;
+    const pubRaw = verifyPublicKeyInput.value.trim();
+    const sigRaw = verifySignatureInput.value.trim();
     const pub = parseHex(verifyPublicKeyInput.value);
     const sig = parseHex(verifySignatureInput.value);
-    const hasMessage = verifyMessageInput.value.trim().length > 0;
-    const canVerify = !!pub && !!sig && hasMessage;
+    const canVerify = !!pub && !!sig;
     verifyButton.disabled = !canVerify;
     tamperVerifyButton.disabled = !canVerify;
     copyPublicButton.disabled = activeKeypair === null;
     copySignatureButton.disabled = currentSignature === null;
+
+    // Flag malformed-but-non-empty hex so assistive tech reports the field state.
+    verifyPublicKeyInput.setAttribute('aria-invalid', pubRaw.length > 0 && !pub ? 'true' : 'false');
+    verifySignatureInput.setAttribute('aria-invalid', sigRaw.length > 0 && !sig ? 'true' : 'false');
   };
 
   const syncToggle = (): void => {
     const current = document.documentElement.getAttribute('data-theme') ?? 'dark';
-    if (current === 'dark') {
-      themeToggle.textContent = '🌙';
-      themeToggle.setAttribute('aria-label', 'Switch to light mode');
-    } else {
-      themeToggle.textContent = '☀️';
-      themeToggle.setAttribute('aria-label', 'Switch to dark mode');
+    const isDark = current === 'dark';
+    if (themeIcon) {
+      themeIcon.textContent = isDark ? '🌙' : '☀️';
     }
+    themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
+    themeToggle.setAttribute('aria-pressed', isDark ? 'false' : 'true');
   };
 
   syncToggle();
@@ -274,7 +185,8 @@ export function mountApp(): void {
     syncToggle();
   });
 
-  generateButton.addEventListener('click', () => {
+  generateButton.addEventListener('click', async () => {
+    const { generateKeypair } = await loadForge();
     const keypair = generateKeypair();
     activeKeypair = keypair;
     currentSignature = null;
@@ -292,13 +204,14 @@ export function mountApp(): void {
     refreshButtons();
   });
 
-  signButton.addEventListener('click', () => {
+  signButton.addEventListener('click', async () => {
     if (!activeKeypair) {
       setResult('INVALID', 'Generate a keypair before signing.');
       refreshButtons();
       return;
     }
 
+    const { signMessage } = await loadForge();
     const message = signMessageInput.value;
     const signed = signMessage(message, activeKeypair.privateKey);
     currentSignature = signed.signature;
@@ -311,18 +224,19 @@ export function mountApp(): void {
     refreshButtons();
   });
 
-  verifyButton.addEventListener('click', () => {
+  verifyButton.addEventListener('click', async () => {
     const pub = parseHex(verifyPublicKeyInput.value);
     const sig = parseHex(verifySignatureInput.value);
     const msg = verifyMessageInput.value;
 
-    if (!pub || !sig || msg.length === 0) {
-      setResult('INVALID', 'Provide valid hex for key/signature and a non-empty message.');
+    if (!pub || !sig) {
+      setResult('INVALID', 'Provide valid hex for key/signature.');
       refreshButtons();
       return;
     }
 
     try {
+      const { verifySignature } = await loadForge();
       const valid = verifySignature(msg, sig, pub);
       signatureDisplay.textContent = toGroupedHex(sig);
       if (valid) {
@@ -336,16 +250,18 @@ export function mountApp(): void {
     refreshButtons();
   });
 
-  tamperVerifyButton.addEventListener('click', () => {
+  tamperVerifyButton.addEventListener('click', async () => {
     const pub = parseHex(verifyPublicKeyInput.value);
     const sig = parseHex(verifySignatureInput.value);
     const msg = verifyMessageInput.value;
 
-    if (!pub || !sig || msg.length === 0) {
+    if (!pub || !sig) {
       setResult('INVALID', 'Cannot tamper: missing or invalid input values.');
       refreshButtons();
       return;
     }
+
+    const { tamperSignature, verifySignature } = await loadForge();
 
     let tampered: Uint8Array;
     try {
@@ -358,6 +274,7 @@ export function mountApp(): void {
 
     try {
       const valid = verifySignature(msg, tampered, pub);
+      currentSignature = tampered;
       verifySignatureInput.value = toRawHex(tampered);
       signatureDisplay.innerHTML = toGroupedHexHtml(tampered, 32);
       if (!valid) {
@@ -379,8 +296,9 @@ export function mountApp(): void {
     try {
       await navigator.clipboard.writeText(toRawHex(activeKeypair.publicKey));
       withCopiedState(copyPublicButton, 'Copy Public Key');
+      announce('Public key copied to clipboard.');
     } catch {
-      /* clipboard unavailable */
+      announce('Could not copy: clipboard unavailable.');
     }
   });
 
@@ -392,8 +310,9 @@ export function mountApp(): void {
     try {
       await navigator.clipboard.writeText(toRawHex(currentSignature));
       withCopiedState(copySignatureButton, 'Copy Signature');
+      announce('Signature copied to clipboard.');
     } catch {
-      /* clipboard unavailable */
+      announce('Could not copy: clipboard unavailable.');
     }
   });
 
@@ -405,6 +324,12 @@ export function mountApp(): void {
   verifyPublicKeyInput.addEventListener('input', refreshButtons);
   verifyMessageInput.addEventListener('input', refreshButtons);
   verifySignatureInput.addEventListener('input', refreshButtons);
+
+  // Warm the crypto chunk on first hint of intent (hover/focus) so the first
+  // click resolves with no perceptible delay, while keeping it off page load.
+  const warm = () => void loadForge();
+  generateButton.addEventListener('pointerenter', warm, { once: true });
+  generateButton.addEventListener('focus', warm, { once: true });
 
   const tabButtons = Array.from(document.querySelectorAll<HTMLButtonElement>('.tab-btn'));
   const tabPanels = Array.from(document.querySelectorAll<HTMLElement>('.tab-panel'));
