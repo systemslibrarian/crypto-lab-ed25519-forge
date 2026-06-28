@@ -11,10 +11,11 @@ Ed25519 Forge is an interactive browser demo of Ed25519 keypair generation, mess
 - **Systems requiring deterministic signature output** — Because the nonce is derived from key + message, the same inputs always produce the same signature, simplifying testing and eliminating RNG-dependent failure modes.
 - **High-throughput verification workloads** — Ed25519 verification is roughly 2x faster than P-256 ECDSA in practice, making it a strong choice for systems verifying many signatures.
 - **Do NOT use Ed25519 for key agreement or encryption** — Ed25519 is a signature scheme; for Diffie-Hellman key exchange on the same curve family, use X25519 instead.
+- Do NOT treat this as production code — it is a browser teaching demo, not a hardened signing library.
 
 ## Live Demo
 
-[https://systemslibrarian.github.io/crypto-lab-ed25519-forge/](https://systemslibrarian.github.io/crypto-lab-ed25519-forge/)
+**[systemslibrarian.github.io/crypto-lab-ed25519-forge](https://systemslibrarian.github.io/crypto-lab-ed25519-forge/)**
 
 The demo lets you generate an Ed25519 keypair, sign an arbitrary text message, and verify the resulting 64-byte signature. You can also tamper a single bit in the signature (byte index 32, XOR 0x01) and re-verify to observe deterministic failure. All hex displays are uppercase with 4-byte grouping; the private key is truncated to first/last 8 hex characters.
 
@@ -33,6 +34,25 @@ The demo lets you generate an Ed25519 keypair, sign an arbitrary text message, a
 - **TLS 1.3** — Ed25519 is a named signature scheme (ed25519 in RFC 8446) for certificate verification and handshake authentication.
 - **age encryption tool** — The age file encryption tool uses Ed25519 keys as the identity/recipient system for its public-key encryption mode.
 
+## How to Run Locally
+
+```bash
+git clone https://github.com/systemslibrarian/crypto-lab-ed25519-forge
+cd crypto-lab-ed25519-forge
+npm install
+npm run dev
+```
+
+## Related Demos
+
+- [crypto-lab-ecdsa-forge](https://systemslibrarian.github.io/crypto-lab-ecdsa-forge/) — the older ECDSA scheme whose nonce-reuse failures Ed25519 avoids by design.
+- [crypto-lab-curve-lens](https://systemslibrarian.github.io/crypto-lab-curve-lens/) — the elliptic-curve group law and Curve25519 arithmetic underneath Ed25519.
+- [crypto-lab-curve448](https://systemslibrarian.github.io/crypto-lab-curve448/) — the higher-security Ed448 sibling (RFC 8032).
+- [crypto-lab-rsa-forge](https://systemslibrarian.github.io/crypto-lab-rsa-forge/) — the RSA signature family Ed25519 is often compared against.
+- [crypto-lab-frost-threshold](https://systemslibrarian.github.io/crypto-lab-frost-threshold/) — threshold Ed25519 signing (FROST, RFC 9591).
+
 ---
 
-"So whether you eat or drink or whatever you do, do it all for the glory of God." — 1 Corinthians 10:31
+*One of 60+ browser demos in the [Crypto Lab](https://crypto-lab.systemslibrarian.dev/) suite.*
+
+*"So whether you eat or drink or whatever you do, do it all for the glory of God." — 1 Corinthians 10:31*
