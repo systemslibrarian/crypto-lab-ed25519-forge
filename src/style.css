@@ -1,4 +1,5 @@
 :root {
+  color-scheme: light;
   --bg: #f0ede6;
   --bg-surface: #fffaf0;
   --bg-elevated: #ffffff;
@@ -7,13 +8,14 @@
   --accent: #ae3f22;
   --accent-strong: #822b16;
   --valid: #0f7a2f;
-  --invalid: #c92536;
+  --invalid: #b01f2f;
   --neutral: #7a5d38;
   --line: #dbccb6;
   --shadow: 0 20px 30px rgba(56, 28, 6, 0.12);
 }
 
 :root[data-theme='dark'] {
+  color-scheme: dark;
   --bg: #11181e;
   --bg-surface: #15222e;
   --bg-elevated: #1b2a37;
@@ -41,6 +43,12 @@ html,
 body {
   margin: 0;
   min-height: 100%;
+}
+
+/* Explicit canvas color: WebKit reports body->canvas propagation as
+   transparent, which breaks automated contrast checks. */
+html {
+  background-color: var(--bg);
 }
 
 body {
@@ -94,7 +102,7 @@ body {
   left: 0.5rem;
   z-index: 100;
   transform: translateY(-150%);
-  background: var(--accent);
+  background-color: var(--accent);
   color: var(--bg);
   font-weight: 700;
   padding: 0.6rem 0.9rem;
@@ -118,7 +126,7 @@ body {
   color: var(--text);
   text-decoration: none;
   font-weight: 700;
-  background: var(--bg-surface);
+  background-color: var(--bg-surface);
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 0.35rem 0.8rem;
@@ -128,7 +136,7 @@ body {
   width: 2.75rem;
   height: 2.75rem;
   border: 1px solid var(--line);
-  background: var(--bg-elevated);
+  background-color: var(--bg-elevated);
   color: var(--text);
   border-radius: 50%;
   padding: 0;
@@ -158,7 +166,7 @@ body {
 }
 
 .panel {
-  background: var(--bg-elevated);
+  background-color: var(--bg-elevated);
   border: 1px solid var(--line);
   border-radius: 20px;
   padding: 1rem;
@@ -180,7 +188,7 @@ body {
   height: 1.7rem;
   flex-shrink: 0;
   border-radius: 50%;
-  background: var(--accent);
+  background-color: var(--accent);
   color: var(--bg);
   font-size: 0.95rem;
   font-weight: 800;
@@ -199,7 +207,7 @@ body {
   width: 100%;
   border: 1px solid var(--line);
   border-radius: 10px;
-  background: var(--bg-surface);
+  background-color: var(--bg-surface);
   color: var(--text);
   padding: 0.6rem 0.66rem;
   font-family: inherit;
@@ -207,7 +215,7 @@ body {
 }
 
 .panel button {
-  background: var(--accent);
+  background-color: var(--accent);
   color: var(--bg);
   font-weight: 700;
   cursor: pointer;
@@ -243,7 +251,7 @@ body {
   border: 1px solid var(--line);
   border-radius: 10px;
   padding: 0.6rem;
-  background: var(--bg-surface);
+  background-color: var(--bg-surface);
   min-height: 2.65rem;
 }
 
@@ -286,12 +294,12 @@ body {
 }
 
 .verify-result.valid .result-icon {
-  background: var(--valid);
+  background-color: var(--valid);
   color: var(--bg);
 }
 
 .verify-result.invalid .result-icon {
-  background: var(--invalid);
+  background-color: var(--invalid);
   color: var(--bg);
 }
 
@@ -308,7 +316,7 @@ body {
 }
 
 .why-matters {
-  background: var(--bg-elevated);
+  background-color: var(--bg-elevated);
   border: 1px solid var(--line);
   border-radius: 18px;
   padding: 0.9rem 1rem;
@@ -326,14 +334,14 @@ body {
 }
 
 .tampered-byte {
-  background: rgba(201, 37, 54, 0.2);
+  background-color: rgba(176, 31, 47, 0.2);
   color: var(--invalid);
   border-radius: 4px;
   padding: 0 1px;
 }
 
 .info-panel {
-  background: var(--bg-elevated);
+  background-color: var(--bg-elevated);
   border: 1px solid var(--line);
   border-radius: 18px;
   padding: 1rem;
@@ -351,7 +359,7 @@ body {
   min-height: 2.75rem;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: var(--bg-surface);
+  background-color: var(--bg-surface);
   color: var(--text);
   padding: 0.45rem 0.85rem;
   cursor: pointer;
@@ -362,7 +370,7 @@ body {
 .tab-btn.active {
   border-color: var(--accent-strong);
   color: var(--bg);
-  background: var(--accent);
+  background-color: var(--accent);
 }
 
 .tab-panel {
@@ -389,7 +397,7 @@ body {
   padding: 0.75rem;
   border-radius: 12px;
   border: 1px solid var(--line);
-  background: var(--bg-surface);
+  background-color: var(--bg-surface);
   color: var(--text);
   overflow: auto;
 }
@@ -399,7 +407,7 @@ body {
   flex-wrap: wrap;
   gap: 0.55rem;
   align-items: center;
-  background: var(--bg-elevated);
+  background-color: var(--bg-elevated);
   border: 1px solid var(--line);
   border-radius: 18px;
   padding: 0.95rem;
@@ -417,7 +425,7 @@ body {
   text-decoration: none;
   border: 1px solid var(--line);
   border-radius: 999px;
-  background: var(--bg-surface);
+  background-color: var(--bg-surface);
   color: var(--text);
   padding: 0.34rem 0.85rem;
   font-size: 0.9rem;
@@ -444,7 +452,7 @@ body {
 }
 
 .panel button:not(:disabled):hover {
-  background: var(--accent-strong);
+  background-color: var(--accent-strong);
 }
 
 .panel button:not(:disabled):active {
