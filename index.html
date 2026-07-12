@@ -143,10 +143,17 @@
         </header>
 
         <main id="main-content" class="lab-main" tabindex="-1">
-          <section class="hero-copy">
-            <h1>Ed25519 Forge</h1>
-            <p>Interactive key generation, deterministic signing, and verification on Curve25519.</p>
-          </section>
+          <header class="cl-hero">
+            <div class="cl-hero-main">
+              <h1 class="cl-hero-title">Ed25519 Forge</h1>
+              <p class="cl-hero-sub">EdDSA · Curve25519 · RFC 8032</p>
+              <p class="cl-hero-desc">Generate a keypair, deterministically sign a message, verify signatures, and forge a small-order key to watch ZIP215 and strict verification disagree.</p>
+            </div>
+            <aside class="cl-hero-why" aria-label="Why it matters">
+              <span class="cl-hero-why-label">WHY IT MATTERS</span>
+              <p class="cl-hero-why-text">Random per-signature nonces are a footgun: one RNG slip leaks the private key, as the PlayStation 3 breach showed. Ed25519's deterministic nonces close that hole, but cofactor-8 malleability still splits libraries on which signatures are valid.</p>
+            </aside>
+          </header>
 
           <section class="panel-grid" aria-label="Ed25519 workflow: generate, sign, verify">
             <article class="panel" id="panel-key-forge" aria-labelledby="panel-key-forge-h">
