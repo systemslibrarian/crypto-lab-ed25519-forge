@@ -1,7 +1,5 @@
 import type { Keypair } from './forge';
 
-const THEME_STORAGE_KEY = 'theme';
-
 // Lazy-load the crypto module (which pulls in @noble/curves) so it is kept off
 // the initial critical path. It is fetched on first interaction intent and
 // cached, so the first click resolves instantly.
@@ -73,7 +71,6 @@ function withCopiedState(button: HTMLButtonElement, baseText: string): void {
 }
 
 export function mountApp(): void {
-  const themeToggle = document.querySelector<HTMLButtonElement>('#theme-toggle');
   const privateKeyDisplay = document.querySelector<HTMLOutputElement>('#private-key-display');
   const publicKeyDisplay = document.querySelector<HTMLOutputElement>('#public-key-display');
   const signatureDisplay = document.querySelector<HTMLOutputElement>('#signature-display');
@@ -92,7 +89,6 @@ export function mountApp(): void {
   const verifySignatureInput = document.querySelector<HTMLTextAreaElement>('#verify-signature');
 
   if (
-    !themeToggle ||
     !privateKeyDisplay ||
     !publicKeyDisplay ||
     !signatureDisplay ||
@@ -112,7 +108,6 @@ export function mountApp(): void {
   }
 
   const srStatus = document.querySelector<HTMLDivElement>('#sr-status');
-  const themeIcon = themeToggle.querySelector<HTMLSpanElement>('.theme-toggle-icon');
 
   let activeKeypair: Keypair | null = null;
   let currentSignature: Uint8Array | null = null;
@@ -165,25 +160,8 @@ export function mountApp(): void {
     verifySignatureInput.setAttribute('aria-invalid', sigRaw.length > 0 && !sig ? 'true' : 'false');
   };
 
-  const syncToggle = (): void => {
-    const current = document.documentElement.getAttribute('data-theme') ?? 'dark';
-    const isDark = current === 'dark';
-    if (themeIcon) {
-      themeIcon.textContent = isDark ? '🌙' : '☀️';
-    }
-    themeToggle.setAttribute('aria-label', isDark ? 'Switch to light mode' : 'Switch to dark mode');
-    themeToggle.setAttribute('aria-pressed', isDark ? 'false' : 'true');
-  };
-
-  syncToggle();
-
-  themeToggle.addEventListener('click', () => {
-    const current = document.documentElement.getAttribute('data-theme') ?? 'dark';
-    const nextTheme = current === 'dark' ? 'light' : 'dark';
-    document.documentElement.setAttribute('data-theme', nextTheme);
-    localStorage.setItem(THEME_STORAGE_KEY, nextTheme);
-    syncToggle();
-  });
+  // Theme toggling is owned by the shared crypto-lab header (#cl-theme-toggle);
+  // this lab no longer ships its own toggle button.
 
   generateButton.addEventListener('click', async () => {
     const { generateKeypair } = await loadForge();
@@ -371,6 +349,44 @@ export function mountApp(): void {
   // Set initial tabindex: only active tab is in tab order
   for (const button of tabButtons) {
     button.setAttribute('tabindex', button.classList.contains('active') ? '0' : '-1');
+  }
+
+  // --- Live cofactor / small-subgroup malleability demo (Pitfalls & ZIP215) ---
+  const cofactorRun = document.querySelector<HTMLButtonElement>('#cofactor-run');
+  const cofactorPubkey = document.querySelector<HTMLOutputElement>('#cofactor-pubkey');
+  const cofactorSig = document.querySelector<HTMLOutputElement>('#cofactor-sig');
+  const cofactorZip215 = document.querySelector<HTMLDivElement>('#cofactor-zip215');
+  const cofactorStrict = document.querySelector<HTMLDivElement>('#cofactor-strict');
+  const cofactorGrid = document.querySelector<HTMLDivElement>('.cofactor-grid');
+
+  if (cofactorRun && cofactorPubkey && cofactorSig && cofactorZip215 && cofactorStrict) {
+    let cofactorVariant = 0;
+
+    const setVerdict = (el: HTMLDivElement, valid: boolean): void => {
+      const result = el.querySelector<HTMLSpanElement>('.cofactor-result');
+      el.classList.remove('neutral', 'valid', 'invalid');
+      el.classList.add(valid ? 'valid' : 'invalid');
+      if (result) result.textContent = valid ? 'ACCEPTS ✓' : 'REJECTS ✗';
+    };
+
+    cofactorRun.addEventListener('click', async () => {
+      const { forgeCofactorSignature } = await loadForge();
+      // Cycle through the 7 non-identity torsion points so repeated clicks show
+      // this is not a single canned example.
+      cofactorVariant = (cofactorVariant % 7) + 1;
+      const forgery = forgeCofactorSignature('I never signed this', cofactorVariant);
+
+      cofactorPubkey.textContent = toGroupedHex(forgery.publicKey);
+      cofactorSig.textContent = toGroupedHex(forgery.signature);
+      cofactorGrid?.setAttribute('aria-hidden', 'false');
+      setVerdict(cofactorZip215, forgery.zip215Valid);
+      setVerdict(cofactorStrict, forgery.strictValid);
+
+      announce(
+        `Cofactor demo: ZIP215 ${forgery.zip215Valid ? 'accepts' : 'rejects'}, ` +
+          `strict RFC 8032 ${forgery.strictValid ? 'accepts' : 'rejects'} the same bytes.`,
+      );
+    });
   }
 
   refreshButtons();

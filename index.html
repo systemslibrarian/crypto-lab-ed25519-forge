@@ -140,9 +140,6 @@
       <div class="lab-shell">
         <header class="lab-topbar">
           <a class="portfolio-badge" href="https://systemslibrarian.github.io/crypto-lab/" target="_blank" rel="noreferrer">crypto-lab portfolio</a>
-          <button id="theme-toggle" class="theme-toggle" type="button" aria-label="Switch to light mode" aria-pressed="false">
-            <span class="theme-toggle-icon" aria-hidden="true">🌙</span>
-          </button>
         </header>
 
         <main id="main-content" class="lab-main" tabindex="-1">
@@ -229,6 +226,27 @@
             <div id="tab-3" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-3" tabindex="0" hidden>
               <h3>Pitfalls & ZIP215</h3>
               <p>Before ZIP215-aligned behavior, signature acceptance around edge cases and cofactor clearing could vary by library, enabling practical malleability and consensus disagreement risks. Verifying the same signature in two different libraries could produce conflicting outcomes. Monero was impacted by this class of ambiguity. ZIP215 standardized consensus-safe verification behavior so implementations agree. Reference: <a href="https://zips.z.cash/zip-0215" target="_blank" rel="noreferrer">ZIP-0215</a>.</p>
+
+              <div class="cofactor-demo">
+                <h4>Live: cofactor malleability</h4>
+                <p class="cofactor-lead">Ed25519's group has cofactor 8, so eight low-order "torsion" points exist. Using one of them as a <em>public key</em>, we can hand the verifier a 64-byte "signature" that was never produced by any secret key. The two <strong>legitimate</strong> verification rules then disagree on the identical bytes:</p>
+                <button id="cofactor-run" type="button">Forge against a small-order key</button>
+                <div class="cofactor-grid" aria-hidden="true">
+                  <div class="cofactor-field">
+                    <span class="cofactor-field-label">Small-order public key (hex)</span>
+                    <output id="cofactor-pubkey" class="mono block scroll">-</output>
+                  </div>
+                  <div class="cofactor-field">
+                    <span class="cofactor-field-label">Crafted signature (hex)</span>
+                    <output id="cofactor-sig" class="mono block scroll">-</output>
+                  </div>
+                </div>
+                <div class="cofactor-verdicts">
+                  <div id="cofactor-zip215" class="cofactor-verdict neutral"><span class="cofactor-rule">ZIP215 (noble default, cofactored)</span><span class="cofactor-result">—</span></div>
+                  <div id="cofactor-strict" class="cofactor-verdict neutral"><span class="cofactor-rule">Strict RFC 8032 / FIPS 186-5</span><span class="cofactor-result">—</span></div>
+                </div>
+                <p id="cofactor-explain" class="cofactor-explain">The same bytes: accepted by one rule, rejected by the other. This is real — run it and inspect the two outputs. It also shows why systems that treat signatures as unique IDs must reject small-order keys.</p>
+              </div>
             </div>
             <div id="tab-4" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-4" tabindex="0" hidden>
               <h3>Where It's Used</h3>
@@ -238,15 +256,15 @@
 
           <section class="related-links" aria-label="Related crypto-lab demos">
             <h3>Explore Related Demos</h3>
-            <a href="https://systemslibrarian.github.io/crypto-lab-rsa-forge/" target="_blank" rel="noreferrer">rsa-forge</a>
-            <a href="https://systemslibrarian.github.io/crypto-lab-dilithium-seal/" target="_blank" rel="noreferrer">dilithium-seal</a>
+            <a href="https://systemslibrarian.github.io/crypto-lab-ecdsa-forge/" target="_blank" rel="noreferrer">ecdsa-forge</a>
             <a href="https://systemslibrarian.github.io/crypto-lab-curve-lens/" target="_blank" rel="noreferrer">curve-lens</a>
+            <a href="https://systemslibrarian.github.io/crypto-lab-curve448/" target="_blank" rel="noreferrer">curve448</a>
+            <a href="https://systemslibrarian.github.io/crypto-lab-rsa-forge/" target="_blank" rel="noreferrer">rsa-forge</a>
             <a href="https://systemslibrarian.github.io/crypto-lab-frost-threshold/" target="_blank" rel="noreferrer">frost-threshold</a>
           </section>
         </main>
 <footer style="margin-top:3rem;padding:2rem 1rem;border-top:1px solid rgba(128,128,128,.25);text-align:center;font-size:.85rem;line-height:1.9;color:var(--text-muted);font-family:ui-monospace,Menlo,Consolas,monospace">
-  <div><strong>Related demos:</strong> <a href="https://systemslibrarian.github.io/crypto-lab-ecdsa-forge/" style="color:var(--accent,#35d6bb)">ecdsa-forge</a> &middot; <a href="https://systemslibrarian.github.io/crypto-lab-curve-lens/" style="color:var(--accent,#35d6bb)">curve-lens</a> &middot; <a href="https://systemslibrarian.github.io/crypto-lab-curve448/" style="color:var(--accent,#35d6bb)">curve448</a> &middot; <a href="https://systemslibrarian.github.io/crypto-lab-rsa-forge/" style="color:var(--accent,#35d6bb)">rsa-forge</a> &middot; <a href="https://systemslibrarian.github.io/crypto-lab-frost-threshold/" style="color:var(--accent,#35d6bb)">frost-threshold</a></div>
-  <div style="margin-top:.5rem"><a href="https://github.com/systemslibrarian/crypto-lab-ed25519-forge" style="color:var(--accent,#35d6bb)">Source on GitHub</a> &middot; <a href="https://crypto-lab.systemslibrarian.dev/" style="color:var(--accent,#35d6bb)">More crypto-lab demos</a></div>
+  <div><a href="https://github.com/systemslibrarian/crypto-lab-ed25519-forge" style="color:var(--accent,#35d6bb)">Source on GitHub</a> &middot; <a href="https://crypto-lab.systemslibrarian.dev/" style="color:var(--accent,#35d6bb)">More crypto-lab demos</a></div>
   <div style="margin-top:.75rem">&ldquo;So whether you eat or drink or whatever you do, do it all for the glory of God.&rdquo; &mdash; 1 Corinthians 10:31</div>
 </footer>
       </div>

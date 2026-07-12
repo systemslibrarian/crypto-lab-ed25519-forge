@@ -2,9 +2,10 @@ import AxeBuilder from '@axe-core/playwright';
 import { expect, test, type Page } from '@playwright/test';
 
 /**
- * WCAG regression gate. Deploys are already gated on the Ed25519 test vectors;
- * this gates them on accessibility the same way. Scans the full page in both
- * themes with every collapsible / hidden region revealed.
+ * WCAG regression gate. Deploys are gated on the RFC 8032 Ed25519 Known-Answer
+ * tests (Vitest, `npm test` in src/forge.test.ts); this gates them on
+ * accessibility the same way. Scans the full page in both themes with every
+ * collapsible / hidden region revealed.
  *
  * This lab has one real <details> ("Why this matters") plus a tab group whose
  * inactive panels carry the boolean `hidden` attribute. We open the <details>,

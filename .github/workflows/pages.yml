@@ -24,7 +24,8 @@ jobs:
           node-version: 20
       - run: npm install
       - run: npx tsc --noEmit
-      - run: npm test --if-present
+      - name: Crypto unit tests (RFC 8032 Ed25519 KATs + cofactor malleability)
+        run: npm test
       - run: npm run build
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium

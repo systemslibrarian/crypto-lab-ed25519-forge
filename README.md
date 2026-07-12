@@ -19,6 +19,16 @@ Ed25519 Forge is an interactive browser demo of Ed25519 keypair generation, mess
 
 The demo lets you generate an Ed25519 keypair, sign an arbitrary text message, and verify the resulting 64-byte signature. You can also tamper a single bit in the signature (byte index 32, XOR 0x01) and re-verify to observe deterministic failure. All hex displays are uppercase with 4-byte grouping; the private key is truncated to first/last 8 hex characters.
 
+The **Pitfalls & ZIP215** tab includes a live cofactor-malleability exhibit. It takes one of the eight low-order (torsion) points as a "public key" and hands the verifier a 64-byte "signature" that no secret key ever produced. Because a small-order key vanishes from the *cofactored* verification equation `[8]·(R + [k]·A − [S]·B) == 0`, the demo's default verifier (`@noble/curves`, ZIP215 / consensus-critical) **accepts** it, while strict RFC 8032 / FIPS 186-5 verification (`{ zip215: false }`) **rejects** the identical bytes. This is the exact cross-library ambiguity that affected Monero and motivated [ZIP-0215](https://zips.z.cash/zip-0215). All of this is real, not simulated — the two verdicts are computed live from `@noble/curves`.
+
+### Tests
+
+The crypto is covered by a Vitest suite (`npm test`, wired into the deploy gate):
+
+- **RFC 8032 §7.1 Known-Answer Tests** — fixed seed → public key → signature triples (TEST 1/2/3), verifying `@noble/curves` reproduces the reference vectors byte-for-byte.
+- **Round-trip and forgery rejection** — sign/verify, wrong-message rejection, wrong-key rejection, single-bit tamper rejection, and determinism.
+- **Cofactor / small-subgroup malleability** — the ZIP215-vs-strict divergence above is asserted for every torsion point, with a control showing the trick fails against a normal prime-order key.
+
 ## What Can Go Wrong
 
 - **Cross-library verification disagreement (pre-ZIP215)** — Before ZIP215 standardized Ed25519 verification behavior, different implementations could return conflicting valid/invalid results for the same signature due to inconsistent cofactor handling and small-subgroup point checks. Monero was affected by this ambiguity.
