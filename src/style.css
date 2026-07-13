@@ -342,6 +342,267 @@ body {
   padding: 0 1px;
 }
 
+/* ---- R / S signature structure --------------------------------------- */
+/* Two accessible, distinct hues (not red/green — reserved for valid/invalid).
+   R = commitment point, S = scalar response. Chosen for AA contrast on the
+   surface backgrounds in BOTH themes; also underlined so structure is not
+   conveyed by color alone. */
+:root {
+  --sig-r: #1d5fb0; /* blue-ish, R */
+  --sig-s: #7a3fae; /* purple-ish, S */
+  /* Verdict text/backgrounds chosen for >=4.5:1 in the light theme. */
+  --valid-ink: #0b5c23;
+  --valid-tint: #e5f3e9;
+  --changed-ink: #7a2b16;
+  --changed-tint: #f6e7df;
+}
+:root[data-theme='dark'] {
+  --sig-r: #7fb4ff;
+  --sig-s: #d0a3ff;
+  --valid-ink: #67e17f;
+  --valid-tint: #16321f;
+  --changed-ink: #ffd166;
+  --changed-tint: #33280f;
+}
+
+.sig-r {
+  color: var(--sig-r);
+  text-decoration: underline;
+  text-decoration-color: var(--sig-r);
+  text-underline-offset: 2px;
+}
+.sig-s {
+  color: var(--sig-s);
+  text-decoration: underline dotted;
+  text-decoration-color: var(--sig-s);
+  text-underline-offset: 2px;
+}
+
+.rs-key {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  margin-left: 0.35rem;
+}
+.rs-swatch {
+  display: inline-block;
+  width: 0.7rem;
+  height: 0.7rem;
+  border-radius: 3px;
+  border: 1px solid var(--line);
+}
+.rs-swatch-r {
+  background-color: var(--sig-r);
+}
+.rs-swatch-s {
+  background-color: var(--sig-s);
+}
+.rs-inline {
+  font-weight: 700;
+}
+.rs-inline-r {
+  color: var(--sig-r);
+}
+.rs-inline-s {
+  color: var(--sig-s);
+}
+
+/* ---- Sign panel: actions + determinism demonstrator ------------------ */
+.sign-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.6rem;
+}
+
+.sign-actions button {
+  margin-top: 0.5rem;
+}
+
+#sign-again-btn {
+  background-color: var(--bg-surface);
+  color: var(--text);
+  border: 1px solid var(--accent);
+}
+
+#sign-again-btn:not(:disabled):hover {
+  background-color: var(--bg-elevated);
+  border-color: var(--accent-strong);
+}
+
+.determinism {
+  margin-top: 0.85rem;
+  padding: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background-color: var(--bg-surface);
+}
+
+.determinism-title {
+  display: block;
+  font-weight: 800;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.determinism-row {
+  margin-bottom: 0.5rem;
+}
+
+.determinism-label {
+  display: block;
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.determinism-verdict {
+  margin: 0.35rem 0 0;
+  padding: 0.55rem 0.65rem;
+  border-radius: 10px;
+  border: 1px solid var(--line);
+  font-size: 0.88rem;
+  line-height: 1.45;
+  font-weight: 700;
+}
+
+.determinism-verdict.identical {
+  color: var(--valid-ink, var(--valid));
+  border-color: var(--valid);
+  background-color: var(--valid-tint);
+}
+
+.determinism-verdict.changed {
+  color: var(--changed-ink, var(--accent-strong));
+  border-color: var(--accent-strong);
+  background-color: var(--changed-tint);
+}
+
+.determinism-verdict.neutral {
+  color: var(--text-muted);
+}
+
+/* ---- Key Forge: scalar-multiplication canvas ------------------------- */
+.scalarmult {
+  margin-top: 0.85rem;
+  padding: 0.8rem;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background-color: var(--bg-surface);
+}
+
+.scalarmult-title {
+  display: block;
+  font-family: 'JetBrains Mono', 'SFMono-Regular', monospace;
+  font-weight: 800;
+  font-size: 0.9rem;
+  margin-bottom: 0.35rem;
+}
+
+.scalarmult-lead {
+  margin: 0 0 0.6rem;
+  font-size: 0.82rem;
+  line-height: 1.45;
+  color: var(--text-muted);
+}
+
+#scalarmult-canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-width: 320px;
+  margin: 0 auto;
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  background-color: var(--bg-elevated);
+}
+
+.scalarmult-status {
+  margin: 0.5rem 0 0;
+  font-size: 0.82rem;
+  line-height: 1.4;
+  color: var(--text-muted);
+  min-height: 2.2em;
+}
+
+/* ---- Verify: failure presets ----------------------------------------- */
+.verify-presets {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.5rem;
+  margin-top: 0.7rem;
+}
+
+.verify-presets-label {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  font-weight: 700;
+}
+
+.preset-btn {
+  width: auto !important;
+  min-height: 2.4rem;
+  margin-top: 0 !important;
+  padding: 0.4rem 0.7rem !important;
+  font-size: 0.85rem !important;
+  background-color: var(--bg-surface) !important;
+  color: var(--text) !important;
+  border: 1px solid var(--line) !important;
+  border-radius: 999px !important;
+  font-weight: 700;
+}
+
+.preset-btn:not(:disabled):hover {
+  border-color: var(--invalid) !important;
+  background-color: var(--bg-elevated) !important;
+}
+
+/* ---- Math tab notes + glossary --------------------------------------- */
+.math-note {
+  margin-top: 0.7rem !important;
+  line-height: 1.55;
+}
+
+.plain-framing {
+  margin: 0 0 0.7rem;
+  padding: 0.7rem 0.8rem;
+  border-left: 3px solid var(--accent);
+  border-radius: 0 10px 10px 0;
+  background-color: color-mix(in oklab, var(--accent) 8%, transparent);
+  color: var(--text) !important;
+  line-height: 1.55;
+}
+
+.glossary {
+  margin: 0.9rem 0 0;
+  display: grid;
+  gap: 0.5rem;
+}
+
+.glossary-item {
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 0.55rem 0.7rem;
+  background-color: var(--bg-surface);
+}
+
+.glossary-item dt {
+  font-weight: 800;
+  font-size: 0.9rem;
+  font-family: 'JetBrains Mono', 'SFMono-Regular', monospace;
+  color: var(--text);
+}
+
+.glossary-item dd {
+  margin: 0.25rem 0 0;
+  font-size: 0.88rem;
+  line-height: 1.5;
+  color: var(--text-muted);
+}
+
 .info-panel {
   background-color: var(--bg-elevated);
   border: 1px solid var(--line);

@@ -29,6 +29,79 @@ export function generateKeypair(): Keypair {
 	return { privateKey, publicKey };
 }
 
+export type ScalarMultStep = {
+	/** The step counter after this operation. */
+	index: number;
+	/** 'double' or 'add' — the double-and-add operation just performed. */
+	op: 'start' | 'double' | 'add';
+	/** Normalized affine coordinates in [0, 1) for plotting (x/p, y/p). */
+	nx: number;
+	ny: number;
+	/** Whether this is the final point (equals the public key). */
+	isFinal: boolean;
+};
+
+/**
+ * Produces a REAL double-and-add walk of [scalar]·G on the actual Ed25519
+ * group, for the animated scalar-multiplication visual. Nothing here is faked:
+ * `scalar` is the genuine clamped scalar derived from the seed (the same value
+ * @noble uses internally), and every returned point is a true group element
+ * computed with noble's point arithmetic. The final point equals the public key.
+ *
+ * To keep the animation short and legible we walk the top `bits` bits of the
+ * scalar (a coarse but honest prefix of the real double-and-add ladder); the
+ * caller then jumps to the exact public point as the final frame, so the walk
+ * always terminates on the true key.
+ *
+ * @param privateKey 32-byte seed.
+ * @param bits       How many high bits of the scalar to animate (coarse walk).
+ */
+export function scalarMultPath(privateKey: Uint8Array, bits = 12): ScalarMultStep[] {
+	const { scalar } = ed25519.utils.getExtendedPublicKey(privateKey);
+	const p = ed25519.Point.Fp.ORDER;
+	const publicPoint = ed25519.Point.BASE.multiplyUnsafe(scalar);
+
+	// The clamped Ed25519 scalar always has bit 254 set, so the ladder's leading
+	// bit is deterministic. Walk from the most-significant bit downward.
+	const topBit = 254;
+	const steps: ScalarMultStep[] = [];
+
+	const norm = (point: typeof ed25519.Point.BASE, index: number, op: ScalarMultStep['op']): ScalarMultStep => {
+		const { x, y } = point.toAffine();
+		return {
+			index,
+			op,
+			nx: Number(x % p) / Number(p),
+			ny: Number(y % p) / Number(p),
+			isFinal: false,
+		};
+	};
+
+	// Start at G (the leading 1 bit initializes the accumulator to the base point).
+	let acc = ed25519.Point.BASE;
+	let index = 0;
+	steps.push(norm(acc, index, 'start'));
+
+	const lastBit = Math.max(0, topBit - bits);
+	for (let bit = topBit - 1; bit >= lastBit; bit--) {
+		acc = acc.double();
+		index++;
+		steps.push(norm(acc, index, 'double'));
+		if ((scalar >> BigInt(bit)) & 1n) {
+			acc = acc.add(ed25519.Point.BASE);
+			index++;
+			steps.push(norm(acc, index, 'add'));
+		}
+	}
+
+	// Final frame: the true public point. (The coarse walk above shows the
+	// mechanism; this guarantees the animation lands on the real key.)
+	const finalStep = norm(publicPoint, index + 1, 'add');
+	finalStep.isFinal = true;
+	steps.push(finalStep);
+	return steps;
+}
+
 export function signMessage(message: string, privateKey: Uint8Array): SignResult {
 	const messageBytes = new TextEncoder().encode(message);
 	const signature = ed25519.sign(messageBytes, privateKey);

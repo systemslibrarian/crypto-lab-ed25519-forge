@@ -170,18 +170,39 @@
                 <button id="copy-public-key" type="button" disabled>Copy Public Key</button>
                 <small>32-byte private scalar → 32-byte compressed point on Curve25519</small>
               </div>
+              <div class="field-stack scalarmult" id="scalarmult-box">
+                <span class="scalarmult-title">public key = [scalar]·G</span>
+                <p class="scalarmult-lead">The public key is the base point <strong>G</strong> added to itself <em>scalar</em> times. Watch a coarse double-and-add walk that mechanical multiplication on the real Ed25519 group (order shown, not to scale).</p>
+                <canvas id="scalarmult-canvas" width="320" height="200" role="img" aria-label="Animated scalar multiplication: the fixed base point G is repeatedly doubled and added, lighting up successive points on the Ed25519 group until it reaches the public point.">Your browser does not support canvas.</canvas>
+                <p id="scalarmult-status" class="scalarmult-status" role="status" aria-live="polite">Generate a keypair to walk [scalar]·G.</p>
+              </div>
             </article>
 
             <article class="panel" id="panel-sign" aria-labelledby="panel-sign-h">
               <h2 id="panel-sign-h"><span class="step-badge" aria-hidden="true">2</span>Sign</h2>
               <label for="sign-message">Message</label>
-              <textarea id="sign-message" rows="5" autocomplete="off">The nonce never repeats.</textarea>
-              <button id="sign-message-btn" type="button" disabled>Sign Message</button>
+              <textarea id="sign-message" rows="4" autocomplete="off">The nonce never repeats.</textarea>
+              <div class="sign-actions">
+                <button id="sign-message-btn" type="button" disabled>Sign Message</button>
+                <button id="sign-again-btn" type="button" disabled title="Sign the same message a second time">Sign Again</button>
+              </div>
               <div class="field-stack">
-                <label for="signature-display">Signature (hex)</label>
+                <label for="signature-display">Signature (hex) — <span class="rs-key"><span class="rs-swatch rs-swatch-r"></span>R (commitment point)</span> <span class="rs-key"><span class="rs-swatch rs-swatch-s"></span>S (scalar response)</span></label>
                 <output id="signature-display" class="mono block scroll" aria-live="off">-</output>
                 <button id="copy-signature" type="button" disabled>Copy Signature</button>
-                <small>64 bytes (R: 32 || S: 32)</small>
+                <small>64 bytes: R = bytes 0–31 (a curve point), S = bytes 32–63 (a scalar).</small>
+              </div>
+              <div class="field-stack determinism" id="determinism-box" hidden>
+                <span class="determinism-title">Deterministic check: sign the same message twice</span>
+                <div class="determinism-row">
+                  <span class="determinism-label">Signature #1</span>
+                  <output id="determinism-sig-1" class="mono block scroll" aria-label="First signature">-</output>
+                </div>
+                <div class="determinism-row">
+                  <span class="determinism-label">Signature #2</span>
+                  <output id="determinism-sig-2" class="mono block scroll" aria-label="Second signature">-</output>
+                </div>
+                <p id="determinism-verdict" class="determinism-verdict neutral" role="status" aria-live="polite">Click "Sign Again" (or edit the message and re-sign) to compare.</p>
               </div>
             </article>
 
@@ -197,6 +218,11 @@
               <div class="verify-actions">
                 <button id="verify-btn" type="button" disabled>Verify ✓</button>
                 <button id="tamper-verify-btn" type="button" disabled>Tamper &amp; Verify ✗</button>
+              </div>
+              <div class="verify-presets" role="group" aria-label="Try a failure">
+                <span class="verify-presets-label">Try a failure:</span>
+                <button id="preset-wrong-key" type="button" class="preset-btn" disabled>Different public key</button>
+                <button id="preset-wrong-msg" type="button" class="preset-btn" disabled>Modified message</button>
               </div>
               <div id="verify-result" class="verify-result neutral">
                 Awaiting keypair, signature, and verification input.
@@ -222,21 +248,40 @@
             </div>
             <div id="tab-2" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-2" tabindex="0" hidden>
               <h3>The Math</h3>
-              <p>Ed25519 is built on a Twisted Edwards curve using the form ax^2 + y^2 = 1 + dx^2y^2 over a prime field Fp with about 255 bits. The base point G is fixed; your private scalar multiplies G to produce the public point. Scalar multiplication is repeated point addition and doubling, which is why efficient point formulas matter. The field size drives the Curve25519 naming.</p>
-              <pre class="ascii-diagram">P + Q = R
-   P o-----\
-            \  combine slopes
-             \___ o R
-             /
-   Q o------/</pre>
+              <p>Ed25519 is built on a <strong>twisted Edwards</strong> curve of the form −x² + y² = 1 + d·x²y² over a prime field F<sub>p</sub> with p = 2²⁵⁵ − 19 (about 255 bits — that "25519" is the prime). The base point G is fixed; your private scalar multiplies G to produce the public point. Scalar multiplication is repeated point addition and doubling.</p>
+              <p class="math-note">Note on the picture: unlike the Weierstrass "draw a line, find the third intersection" chord-and-tangent rule you may have seen for secp256k1, twisted Edwards addition uses a single <em>unified</em> algebraic formula that works for <em>every</em> pair of points — even a point added to itself — with no special cases and no exceptional points. That completeness (no branches to leak timing) is a security feature, not just a convenience, which is why the geometric slope diagram is the wrong mental model here. The addition is arithmetic on coordinates:</p>
+              <pre class="ascii-diagram" tabindex="0" role="region" aria-label="Twisted Edwards addition formula">(x₁,y₁) + (x₂,y₂) = (x₃, y₃)
+
+        x₁y₂ + x₂y₁                y₁y₂ + x₁x₂
+x₃ = ─────────────────    y₃ = ─────────────────
+      1 + d·x₁x₂y₁y₂            1 − d·x₁x₂y₁y₂
+
+one formula · all inputs · no exceptions</pre>
+              <p class="math-note">See scalar multiplication itself animate in the <strong>Key Forge</strong> panel: each step is one double-and-add on this same group.</p>
             </div>
             <div id="tab-3" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-3" tabindex="0" hidden>
               <h3>Pitfalls & ZIP215</h3>
+              <p class="plain-framing">In plain terms: a signature is supposed to prove that someone holding the secret key really signed this exact message. A specially chosen <em>fake</em> public key can break that promise — for some verifiers but not others. Below, you can watch two <strong>correct, spec-following</strong> libraries look at the identical bytes and <strong>disagree</strong> on whether they are valid. That disagreement is the whole pitfall.</p>
               <p>Before ZIP215-aligned behavior, signature acceptance around edge cases and cofactor clearing could vary by library, enabling practical malleability and consensus disagreement risks. Verifying the same signature in two different libraries could produce conflicting outcomes. Monero was impacted by this class of ambiguity. ZIP215 standardized consensus-safe verification behavior so implementations agree. Reference: <a href="https://zips.z.cash/zip-0215" target="_blank" rel="noreferrer">ZIP-0215</a>.</p>
+
+              <dl class="glossary">
+                <div class="glossary-item">
+                  <dt>Torsion point</dt>
+                  <dd>A special point that loops back to zero after just a few additions (a "small order"). Real public keys don't do this — that is exactly why one can be used to build a fake.</dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>Cofactor 8</dt>
+                  <dd>The Ed25519 group is 8 times bigger than the "real" prime-order subgroup used for signing. Those 8 extra copies are where the 8 torsion points live — and where the malleability hides.</dd>
+                </div>
+                <div class="glossary-item">
+                  <dt>[8]·(R + [k]·A − [S]·B) == 0</dt>
+                  <dd>The cofactored verification check. <strong>A</strong> is the public key, <strong>B</strong> the base point, <strong>R</strong>/<strong>S</strong> the two halves of the signature. Multiplying by 8 (the cofactor) makes any torsion part of <strong>A</strong> vanish — which is precisely the hole the forgery drives through.</dd>
+                </div>
+              </dl>
 
               <div class="cofactor-demo">
                 <h4>Live: cofactor malleability</h4>
-                <p class="cofactor-lead">Ed25519's group has cofactor 8, so eight low-order "torsion" points exist. Using one of them as a <em>public key</em>, we can hand the verifier a 64-byte "signature" that was never produced by any secret key. The two <strong>legitimate</strong> verification rules then disagree on the identical bytes:</p>
+                <p class="cofactor-lead">Ed25519's group has cofactor 8, so eight low-order "torsion" points exist. Using one of them as a <em>public key</em>, we can hand the verifier a 64-byte "signature" — split into its <span class="rs-key"><span class="rs-swatch rs-swatch-r"></span>R</span> and <span class="rs-key"><span class="rs-swatch rs-swatch-s"></span>S</span> halves below — that was never produced by any secret key. The forge trick simply sets <span class="rs-inline rs-inline-r">R</span> = [<span class="rs-inline rs-inline-s">S</span>]·B. The two <strong>legitimate</strong> verification rules then disagree on the identical bytes:</p>
                 <button id="cofactor-run" type="button">Forge against a small-order key</button>
                 <div class="cofactor-grid" aria-hidden="true">
                   <div class="cofactor-field">

@@ -35,6 +35,29 @@ async function revealAll(page: Page): Promise<void> {
       panel.removeAttribute('hidden');
       panel.classList.add('active');
     }
+    // Reveal regions toggled via the boolean `hidden` attribute at runtime
+    // (e.g. the Sign panel's determinism demonstrator) so their contrast is
+    // scanned too.
+    for (const el of document.querySelectorAll<HTMLElement>('[hidden]')) {
+      el.removeAttribute('hidden');
+    }
+    // Exercise the runtime-only verdict color states so their (tinted) text is
+    // contrast-checked: the determinism verdict and both cofactor verdicts.
+    const detVerdict = document.querySelector('#determinism-verdict');
+    if (detVerdict) {
+      detVerdict.classList.remove('neutral');
+      detVerdict.classList.add('identical');
+      detVerdict.textContent = 'IDENTICAL — same key + same message yields the same signature.';
+    }
+    for (const id of ['#cofactor-zip215', '#cofactor-strict']) {
+      const el = document.querySelector(id);
+      const res = el?.querySelector('.cofactor-result');
+      if (el && res) {
+        el.classList.remove('neutral');
+        el.classList.add(id.includes('zip') ? 'valid' : 'invalid');
+        res.textContent = id.includes('zip') ? 'ACCEPTS' : 'REJECTS';
+      }
+    }
     // Generic safety net: clear any remaining inline display:none regions.
     for (const el of document.querySelectorAll<HTMLElement>('[style*="display"]')) {
       if (el.style && el.style.display === 'none') el.style.display = '';

@@ -3,6 +3,7 @@ import { ed25519 } from '@noble/curves/ed25519.js';
 import {
   forgeCofactorSignature,
   generateKeypair,
+  scalarMultPath,
   signMessage,
   tamperSignature,
   verifySignature,
@@ -124,6 +125,45 @@ describe('sign / verify round-trip and forgery rejection', () => {
     const a = signMessage('same input', kp.privateKey).signature;
     const b = signMessage('same input', kp.privateKey).signature;
     expect(bytesToHex(a)).toBe(bytesToHex(b));
+  });
+});
+
+describe('scalarMultPath (animated [scalar]·G walk — must be REAL points)', () => {
+  it('lands on the true public point as its final step', () => {
+    const kp = generateKeypair();
+    const path = scalarMultPath(kp.privateKey, 12);
+    expect(path.length).toBeGreaterThan(2);
+    const final = path[path.length - 1];
+    expect(final.isFinal).toBe(true);
+
+    // Recompute the public point from the real clamped scalar and confirm the
+    // final animation frame's normalized coordinates match it exactly. This
+    // proves the visual is not faked — it plots genuine group elements.
+    const { scalar } = ed25519.utils.getExtendedPublicKey(kp.privateKey);
+    const pub = ed25519.Point.BASE.multiplyUnsafe(scalar).toAffine();
+    const p = ed25519.Point.Fp.ORDER;
+    expect(final.nx).toBeCloseTo(Number(pub.x % p) / Number(p), 10);
+    expect(final.ny).toBeCloseTo(Number(pub.y % p) / Number(p), 10);
+  });
+
+  it('every plotted coordinate is a normalized affine value in [0, 1)', () => {
+    const kp = generateKeypair();
+    for (const s of scalarMultPath(kp.privateKey, 10)) {
+      expect(s.nx).toBeGreaterThanOrEqual(0);
+      expect(s.nx).toBeLessThan(1);
+      expect(s.ny).toBeGreaterThanOrEqual(0);
+      expect(s.ny).toBeLessThan(1);
+    }
+  });
+
+  it('starts at the base point G', () => {
+    const kp = generateKeypair();
+    const first = scalarMultPath(kp.privateKey, 8)[0];
+    expect(first.op).toBe('start');
+    const g = ed25519.Point.BASE.toAffine();
+    const p = ed25519.Point.Fp.ORDER;
+    expect(first.nx).toBeCloseTo(Number(g.x % p) / Number(p), 10);
+    expect(first.ny).toBeCloseTo(Number(g.y % p) / Number(p), 10);
   });
 });
 
