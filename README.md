@@ -6,8 +6,8 @@ Ed25519 Forge is an interactive browser demo of Ed25519 keypair generation, mess
 
 ## When to Use It
 
-- **SSH authentication keys** — Ed25519 is the default key type in OpenSSH since 2014, offering short keys (32-byte public) and fast operations compared to RSA.
-- **Protocol message signing with compact signatures** — At 64 bytes per signature with no DER overhead, Ed25519 is well-suited for bandwidth- or storage-constrained protocols like WireGuard and TLS 1.3.
+- **SSH authentication keys** — Ed25519 has been supported by OpenSSH since 6.5 (2014) and is the `ssh-keygen` default since 9.5 (2023), offering short keys (32-byte public) and fast operations compared to RSA.
+- **Protocol message signing with compact signatures** — At 64 bytes per signature with no DER overhead, Ed25519 is well-suited for bandwidth- or storage-constrained protocols like TLS 1.3.
 - **Systems requiring deterministic signature output** — Because the nonce is derived from key + message, the same inputs always produce the same signature, simplifying testing and eliminating RNG-dependent failure modes.
 - **High-throughput verification workloads** — Ed25519 verification is roughly 2x faster than P-256 ECDSA in practice, making it a strong choice for systems verifying many signatures.
 - **Do NOT use Ed25519 for key agreement or encryption** — Ed25519 is a signature scheme; for Diffie-Hellman key exchange on the same curve family, use X25519 instead.
@@ -45,9 +45,9 @@ The crypto is covered by a Vitest suite (`npm test`, wired into the deploy gate)
 
 ## Real-World Usage
 
-- **OpenSSH** — Ed25519 has been the default key type since OpenSSH 6.5 (2014), used for both user authentication and host keys.
+- **OpenSSH** — Ed25519 has been supported since OpenSSH 6.5 (2014) and is the `ssh-keygen` default since 9.5 (2023), used for both user authentication and host keys.
 - **Signal Protocol** — Signal uses Ed25519 (via XEdDSA) for identity keys and signed prekeys in the X3DH key agreement protocol.
-- **WireGuard** — Ed25519 is used alongside X25519 for authenticating peers in the Noise protocol framework that WireGuard implements.
+- **Zcash** — Ed25519 signatures appear in the Zcash consensus rules, which is why ZIP-215 had to pin down exactly which signatures every implementation must accept.
 - **TLS 1.3** — Ed25519 is a named signature scheme (ed25519 in RFC 8446) for certificate verification and handshake authentication.
 - **age encryption tool** — The age file encryption tool uses Ed25519 keys as the identity/recipient system for its public-key encryption mode.
 
