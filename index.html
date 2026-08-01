@@ -17,11 +17,6 @@
     <title>Ed25519 Forge — crypto-lab</title>
   </head>
   <body>
-<!-- BEGIN crypto-lab shared header — managed; edit shared-header.html + re-run reapply-header.py
-     Identical on every lab. Self-contained styles. Accents use each demo's own
-     --accent CSS variable (teal #35d6bb fallback). The ONLY per-repo value is the
-     repo name (crypto-lab-ed25519-forge) in the GitHub link.
-     Source of truth: github.com/systemslibrarian/crypto-lab/shared-header.html -->
 <style>
   .cl-topbar{
     /* The bar is always dark (#0b1512) regardless of page theme, so header
@@ -133,14 +128,17 @@
     else dedupeBanner();
   })();
 </script>
-<!-- END crypto-lab shared header -->
     <div id="app">
       <a class="skip-link" href="#main-content">Skip to main content</a>
       <div id="sr-status" class="sr-only" role="status" aria-live="polite"></div>
       <div class="lab-shell">
-        <header class="lab-topbar">
+        <!-- Intentionally a <div>, not a <header>: a <header> here is not inside
+             any sectioning element, so it would map to a SECOND banner landmark
+             alongside the shared .cl-topbar (the dedupe script only demotes
+             <header>s that are direct children of <body>). -->
+        <div class="lab-topbar">
           <a class="portfolio-badge" href="https://systemslibrarian.github.io/crypto-lab/" target="_blank" rel="noreferrer">crypto-lab portfolio</a>
-        </header>
+        </div>
 
         <main id="main-content" class="lab-main" tabindex="-1">
           <header class="cl-hero">
@@ -188,7 +186,7 @@
               </div>
               <div class="field-stack">
                 <label for="signature-display">Signature (hex) — <span class="rs-key"><span class="rs-swatch rs-swatch-r"></span>R (commitment point)</span> <span class="rs-key"><span class="rs-swatch rs-swatch-s"></span>S (scalar response)</span></label>
-                <output id="signature-display" class="mono block scroll" aria-live="off">-</output>
+                <output id="signature-display" class="mono block scroll" tabindex="0" aria-live="off">-</output>
                 <button id="copy-signature" type="button" disabled>Copy Signature</button>
                 <small>64 bytes: R = bytes 0–31 (a curve point), S = bytes 32–63 (a scalar).</small>
               </div>
@@ -196,11 +194,11 @@
                 <span class="determinism-title">Deterministic check: sign the same message twice</span>
                 <div class="determinism-row">
                   <span class="determinism-label">Signature #1</span>
-                  <output id="determinism-sig-1" class="mono block scroll" aria-label="First signature">-</output>
+                  <output id="determinism-sig-1" class="mono block scroll" tabindex="0" aria-label="First signature">-</output>
                 </div>
                 <div class="determinism-row">
                   <span class="determinism-label">Signature #2</span>
-                  <output id="determinism-sig-2" class="mono block scroll" aria-label="Second signature">-</output>
+                  <output id="determinism-sig-2" class="mono block scroll" tabindex="0" aria-label="Second signature">-</output>
                 </div>
                 <p id="determinism-verdict" class="determinism-verdict neutral" role="status" aria-live="polite">Click "Sign Again" (or edit the message and re-sign) to compare.</p>
               </div>

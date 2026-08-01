@@ -78,8 +78,15 @@ body {
   gap: 1.15rem;
 }
 
+/* The skip link focuses <main> programmatically; suppressing that ring avoids
+   outlining the whole page. Keyboard-visible focus still gets a ring. */
 .lab-main:focus {
   outline: none;
+}
+
+.lab-main:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 /* Screen-reader-only utility: visually hidden, still announced. */
@@ -123,6 +130,9 @@ body {
 }
 
 .portfolio-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 2.75rem;
   color: var(--text);
   text-decoration: none;
   font-weight: 700;
@@ -148,7 +158,6 @@ body {
   flex-shrink: 0;
 }
 
-/* BEGIN cl-hero standard — managed, keep in sync across fleet */
 /* Theme mapping for this lab: --text-dim -> --text-muted, --border -> --line. */
 .cl-hero{display:flex;align-items:flex-start;justify-content:space-between;gap:clamp(1rem,4vw,3rem);flex-wrap:wrap;margin:clamp(1rem,3vw,2rem) 0 1.5rem;}
 .cl-hero-main{flex:1 1 22rem;min-width:min(100%,20rem);}
@@ -158,8 +167,7 @@ body {
 .cl-hero-why{flex:0 1 min(40%,26rem);min-width:min(100%,15rem);border:1px solid var(--line);border-radius:10px;padding:.85rem 1.05rem;background:color-mix(in oklab,var(--accent) 6%,transparent);}
 .cl-hero-why-label{display:block;font-size:.68rem;font-weight:700;letter-spacing:.14em;}
 .cl-hero-why-text{margin:.35rem 0 0;font-size:.95rem;line-height:1.5;}
-@media (max-width:640px){.cl-hero{flex-direction:column;}.cl-hero-why{flex-basis:auto;width:100%;}}
-/* END cl-hero standard */
+@media (max-width:640px){.cl-hero{flex-direction:column;}.cl-hero-why{flex-basis:auto;width:100%;}.cl-hero-main{flex-basis:auto;min-width:0;}}
 
 .panel-grid {
   display: grid;
@@ -324,9 +332,13 @@ body {
   padding: 0.9rem 1rem;
 }
 
+/* Padding (not display:flex) keeps the native disclosure marker while giving
+   the summary a >=44px tap target. */
 .why-matters summary {
   cursor: pointer;
   font-weight: 800;
+  min-height: 2.75rem;
+  padding: 0.65rem 0;
 }
 
 .why-matters p {
@@ -544,7 +556,7 @@ body {
 
 .preset-btn {
   width: auto !important;
-  min-height: 2.4rem;
+  min-height: 2.75rem;
   margin-top: 0 !important;
   padding: 0.4rem 0.7rem !important;
   font-size: 0.85rem !important;
@@ -789,7 +801,7 @@ body {
 .related-links a {
   display: inline-flex;
   align-items: center;
-  min-height: 2.5rem;
+  min-height: 2.75rem;
   text-decoration: none;
   border: 1px solid var(--line);
   border-radius: 999px;
