@@ -11,6 +11,12 @@
   --invalid: #b01f2f;
   --neutral: #7a5d38;
   --line: #dbccb6;
+  /* Control boundaries only (textarea, tab/preset buttons, topbar badge and
+     toggle, related-link pills). Those controls are filled with --bg-surface or
+     --bg-elevated, which sit at 1.04-1.22:1 against the surface behind them, so
+     the border is the sole boundary and WCAG 2.1 SC 1.4.11 requires 3:1.
+     --line is unchanged for decorative rules (panels, blocks, verdict cards). */
+  --line-strong: #a28150;
   --shadow: 0 20px 30px rgba(56, 28, 6, 0.12);
 }
 
@@ -27,6 +33,7 @@
   --invalid: #ff8d92;
   --neutral: #f7c970;
   --line: #2f4355;
+  --line-strong: #537796;
   --shadow: 0 20px 30px rgba(0, 0, 0, 0.38);
 }
 
@@ -137,7 +144,7 @@ body {
   text-decoration: none;
   font-weight: 700;
   background-color: var(--bg-surface);
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: 999px;
   padding: 0.35rem 0.8rem;
 }
@@ -145,7 +152,7 @@ body {
 .theme-toggle {
   width: 2.75rem;
   height: 2.75rem;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   background-color: var(--bg-elevated);
   color: var(--text);
   border-radius: 50%;
@@ -222,6 +229,13 @@ body {
   padding: 0.6rem 0.66rem;
   font-family: inherit;
   font-size: 1rem;
+}
+
+/* The textarea's --bg-surface fill is 1.04:1 (light) / 1.10:1 (dark) against the
+   panel, so only the border marks its edge — SC 1.4.11. The sibling button is
+   accent-filled (5.9:1 / 10.2:1) and keeps the lighter decorative --line. */
+.panel textarea {
+  border-color: var(--line-strong);
 }
 
 .panel button {
@@ -562,7 +576,7 @@ body {
   font-size: 0.85rem !important;
   background-color: var(--bg-surface) !important;
   color: var(--text) !important;
-  border: 1px solid var(--line) !important;
+  border: 1px solid var(--line-strong) !important;
   border-radius: 999px !important;
   font-weight: 700;
 }
@@ -632,7 +646,7 @@ body {
 .tab-btn {
   width: auto;
   min-height: 2.75rem;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: 999px;
   background-color: var(--bg-surface);
   color: var(--text);
@@ -803,7 +817,7 @@ body {
   align-items: center;
   min-height: 2.75rem;
   text-decoration: none;
-  border: 1px solid var(--line);
+  border: 1px solid var(--line-strong);
   border-radius: 999px;
   background-color: var(--bg-surface);
   color: var(--text);
