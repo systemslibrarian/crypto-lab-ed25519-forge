@@ -957,3 +957,84 @@ body {
     justify-content: center;
   }
 }
+
+/* ─── Live ECDSA nonce-reuse exhibit + measured determinism ─── */
+.ecdsa-demo {
+  margin-top: 1.1rem;
+  padding: 0.9rem 1rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background-color: var(--bg-surface);
+}
+
+.ecdsa-demo h4 {
+  margin: 0 0 0.4rem;
+}
+
+.ecdsa-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin: 0.6rem 0;
+}
+
+.ecdsa-output {
+  margin-top: 0.6rem;
+}
+
+.ecdsa-output[hidden] {
+  display: none;
+}
+
+.ecdsa-rows {
+  margin: 0 0 0.6rem;
+  display: grid;
+  gap: 0.25rem;
+}
+
+.ecdsa-rows > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 0.2rem;
+}
+
+.ecdsa-rows dt {
+  font-weight: 700;
+  color: var(--text-muted);
+}
+
+.ecdsa-rows dd {
+  margin: 0;
+}
+
+.ecdsa-rows dd.mono {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  font-size: 0.82rem;
+  word-break: break-all;
+}
+
+.ecdsa-verdict {
+  border-radius: 12px;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--line);
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.ecdsa-verdict.leaked {
+  color: var(--invalid);
+  border-color: var(--invalid);
+}
+
+.ecdsa-verdict.safe {
+  color: var(--valid);
+  border-color: var(--valid);
+}
+
+.ecdsa-running {
+  color: var(--neutral);
+  font-weight: 700;
+}

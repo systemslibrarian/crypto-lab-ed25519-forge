@@ -248,7 +248,7 @@
 
           <details class="why-matters" id="why-matters">
             <summary>Why this matters</summary>
-            <p>Most signature schemes require a random nonce per signature. If that RNG fails - even once - your private key is exposed. Ed25519 eliminates this entire class of failure by deriving the nonce deterministically from the private key and message. Sony's PlayStation 3 was broken because their ECDSA implementation used a constant nonce. Ed25519 makes that mistake structurally impossible.</p>
+            <p>Most signature schemes require a random nonce per signature. If that RNG fails - even once - your private key is exposed. Ed25519 eliminates this entire class of failure by deriving the nonce deterministically from the private key and message. Sony's PlayStation 3 was broken because their ECDSA implementation used a constant nonce. Ed25519 makes that mistake structurally impossible. The "Ed25519 vs ECDSA" tab runs this break live on real P-256: reuse the nonce and watch the private key fall out and forge a signature the real verifier accepts.</p>
           </details>
 
           <section class="info-panel">
@@ -261,6 +261,25 @@
             <div id="tab-1" class="tab-panel active" role="tabpanel" aria-labelledby="tab-btn-1" tabindex="0">
               <h3>Ed25519 vs ECDSA</h3>
               <p>Ed25519 uses deterministic nonces, derived from private key material and message, so nonce RNG failure cannot expose keys the way bad ECDSA nonce generation can. Its group has cofactor = 8, which affects validation rules and small-subgroup edge cases. Ed25519 is commonly batch-verified, often verifies around 2x faster than P-256 ECDSA in practical stacks, and always outputs compact 64-byte signatures (instead of variable-length DER encoding).</p>
+
+              <div class="ecdsa-demo" id="ecdsa-demo">
+                <h4>Live: an ECDSA nonce slip leaks the whole private key</h4>
+                <p>This runs on real NIST <strong>P-256</strong> in your browser. A fresh keypair signs two different messages. When the nonce <em>k</em> repeats, the two signatures share the same <em>r</em>, and the private key <em>d</em> falls straight out of the algebra — then a brand-new message is signed with the recovered key and handed to the real <code>@noble/curves</code> P-256 verifier. This is the class of bug Ed25519's deterministic nonce makes impossible.</p>
+                <div class="ecdsa-actions">
+                  <button id="ecdsa-reuse-btn" type="button">Reuse the nonce &rarr; recover key</button>
+                  <button id="ecdsa-control-btn" type="button" class="preset-btn">Control: fresh nonces (safe)</button>
+                </div>
+                <div id="ecdsa-output" class="ecdsa-output" role="region" aria-live="polite" hidden></div>
+              </div>
+
+              <div class="ecdsa-demo" id="determinism-measure">
+                <h4>Live: Ed25519 signs the same message twice — measured</h4>
+                <p>The claim that Ed25519 is deterministic is checked, not asserted: the same message is signed twice with a fresh key and the two 64-byte signatures are compared byte-for-byte, right here.</p>
+                <div class="ecdsa-actions">
+                  <button id="determinism-measure-btn" type="button">Sign twice &amp; compare bytes</button>
+                </div>
+                <div id="determinism-measure-output" class="ecdsa-output" role="region" aria-live="polite" hidden></div>
+              </div>
             </div>
             <div id="tab-2" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-2" tabindex="0" hidden>
               <h3>The Math</h3>

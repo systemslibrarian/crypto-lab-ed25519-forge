@@ -1,7 +1,9 @@
 import './style.css';
 import { mountApp } from './ui';
+import { mountEcdsaDemo } from './ecdsa-ui';
 
 mountApp();
+mountEcdsaDemo();
 
 // Dev-only self-test: confirms the crypto primitives round-trip and that a
 // tampered signature fails. Stripped from production builds, and dynamically
