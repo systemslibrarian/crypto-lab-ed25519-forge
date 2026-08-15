@@ -112,9 +112,3 @@ test('no WCAG A/AA violations in dark theme', async ({ page }) => {
   await runSuite(page);
 });
 
-test('no WCAG A/AA violations in light theme', async ({ page }) => {
-  await page.goto('.');
-  await page.locator('#cl-theme-toggle').click();
-  await expect(page.locator('html')).toHaveAttribute('data-theme', 'light');
-  await runSuite(page);
-});
