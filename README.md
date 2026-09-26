@@ -49,7 +49,7 @@ The crypto is covered by a Vitest suite (`npm test`, wired into the deploy gate)
 - **OpenSSH** — Ed25519 has been supported since OpenSSH 6.5 (2014) and is the `ssh-keygen` default since 9.5 (2023), used for both user authentication and host keys.
 - **Signal Protocol** — Signal uses Ed25519 (via XEdDSA) for identity keys and signed prekeys in the X3DH key agreement protocol.
 - **Zcash** — Ed25519 signatures appear in the Zcash consensus rules, which is why ZIP-215 had to pin down exactly which signatures every implementation must accept.
-- **TLS 1.3** — Ed25519 is a named signature scheme (ed25519 in RFC 8446) for certificate verification and handshake authentication.
+- **TLS 1.3** — Ed25519 is a named signature scheme (ed25519 in RFC 9846) for certificate verification and handshake authentication.
 - **age encryption tool** — age's native recipients and identities are **X25519**, not Ed25519. As a convenience feature age also accepts `ssh-ed25519` (and `ssh-rsa`) SSH public keys as recipients, which is an interoperability path for existing SSH infrastructure rather than age's own key format.
 
 ## How to Run Locally
