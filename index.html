@@ -154,11 +154,11 @@
             <div class="cl-hero-main">
               <h1 class="cl-hero-title">Ed25519 Forge</h1>
               <p class="cl-hero-sub">EdDSA · Curve25519 · RFC 8032</p>
-              <p class="cl-hero-desc">Generate a keypair, deterministically sign a message, verify signatures, and forge a small-order key to watch ZIP215 and strict verification disagree.</p>
+              <p class="cl-hero-desc">Make a pair of keys, sign a note, then change one character and watch the check fail — then go deeper, into signing that is identical every time and the edge cases a verifier has to screen for.</p>
             </div>
             <aside class="cl-hero-why" aria-label="Why it matters">
               <span class="cl-hero-why-label">WHY IT MATTERS</span>
-              <p class="cl-hero-why-text">Random per-signature nonces are a footgun: one RNG slip leaks the private key, as the PlayStation 3 breach showed. Ed25519's deterministic nonces close that hole, but cofactor-8 malleability still splits libraries on which signatures are valid.</p>
+              <p class="cl-hero-why-text">A signature is what lets anyone check that a message came from you and has not been altered since. Most schemes need a fresh random number for every signature, and one slip gives away the private key — that is how the PlayStation 3 was broken. Ed25519 removes that particular risk by design.</p>
             </aside>
           </header>
 
