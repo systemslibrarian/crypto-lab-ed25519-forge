@@ -1038,3 +1038,156 @@ body {
   color: var(--neutral);
   font-weight: 700;
 }
+
+/* ---- Beginner front-section -------------------------------------------
+   Sits between the hero and the three working panels. Its job is to be the
+   first thing a newcomer meets, so it carries no hex until the <details> is
+   opened and no notation at all. The verdict colours reuse --valid/--invalid
+   so an accepted and a rejected check read the same here as they do in the
+   Verify panel below. */
+
+.first-look {
+  background: var(--bg-surface);
+  border: 1px solid var(--line);
+  border-left: 4px solid var(--accent);
+  border-radius: 12px;
+  padding: clamp(1rem, 3vw, 1.75rem);
+  margin-bottom: 2rem;
+}
+
+.first-look h2 {
+  margin-top: 0;
+  margin-bottom: 0.5rem;
+}
+
+.first-look-lead {
+  color: var(--text-muted);
+  max-width: 68ch;
+  margin-top: 0;
+}
+
+.first-look-steps {
+  list-style: none;
+  margin: 1.5rem 0 0;
+  padding: 0;
+  display: grid;
+  gap: 1.25rem;
+}
+
+.first-look-step {
+  border-top: 1px solid var(--line);
+  padding-top: 1rem;
+}
+
+.first-look-step h3 {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  margin: 0 0 0.4rem;
+  font-size: 1.05rem;
+}
+
+.first-look-step p {
+  max-width: 68ch;
+}
+
+.first-look-num {
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  width: 1.7rem;
+  height: 1.7rem;
+  border-radius: 50%;
+  border: 1.5px solid var(--accent);
+  color: var(--accent-strong);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.first-look-step label {
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+#fl-note {
+  display: block;
+  width: 100%;
+  max-width: 44rem;
+  box-sizing: border-box;
+  margin-bottom: 0.75rem;
+  padding: 0.6rem 0.7rem;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--bg-elevated);
+  color: var(--text);
+  font: inherit;
+}
+
+.first-look-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.first-look-status {
+  color: var(--text-muted);
+  max-width: 68ch;
+  margin-bottom: 0;
+}
+
+.first-look-verdict {
+  margin: 0.9rem 0 0;
+  padding: 0.8rem 0.9rem;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: var(--bg-elevated);
+  color: var(--text-muted);
+  max-width: 68ch;
+  font-weight: 600;
+}
+
+.first-look-verdict[data-verdict='accepted'] {
+  border-color: var(--valid);
+  color: var(--valid);
+}
+
+.first-look-verdict[data-verdict='rejected'] {
+  border-color: var(--invalid);
+  color: var(--invalid);
+}
+
+.first-look-bytes {
+  margin-top: 1.5rem;
+  border-top: 1px solid var(--line);
+  padding-top: 0.9rem;
+}
+
+.first-look-bytes summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.first-look-bytes-note,
+.first-look-next {
+  color: var(--text-muted);
+  max-width: 68ch;
+}
+
+.first-look-byte-row {
+  margin-top: 0.7rem;
+}
+
+.first-look-byte-label {
+  display: block;
+  font-size: 0.8rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 0.25rem;
+}
+
+.first-look-next {
+  margin-bottom: 0;
+  padding-top: 0.9rem;
+  border-top: 1px solid var(--line);
+}
