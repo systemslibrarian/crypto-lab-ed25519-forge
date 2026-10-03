@@ -1,7 +1,9 @@
 import './style.css';
 import { mountApp } from './ui';
+import { mountFirstLook } from './first-look';
 import { mountEcdsaDemo } from './ecdsa-ui';
 
+mountFirstLook();
 mountApp();
 mountEcdsaDemo();
 

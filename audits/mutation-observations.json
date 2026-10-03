@@ -1,0 +1,75 @@
+{
+  "scope": "unit + production-browser source mutations",
+  "observations": [
+    {
+      "id": "M1",
+      "file": "src/first-look.ts",
+      "anchor": "const ok = verifySignature(note.value, state.signature, state.publicKey);",
+      "replace": "const ok = verifySignature(note.value, state.signature, state.publicKey) || true;",
+      "test": "change one character and the same signature is rejected",
+      "kind": "browser",
+      "why": "a check that accepts everything still shows ACCEPTED on an untouched note",
+      "observed": "KILLED",
+      "baselinePassed": true,
+      "bundleBefore": "6affe46055fedffcf3929efce31ce8551c121d16d9d55c1a46e9feecb961d2b0",
+      "bundleMutated": "2c1df7745a9474f89c3eb235abcb123e1067f400ee45a6c6e5a4a8ac1cce3fab",
+      "exitCode": 1
+    },
+    {
+      "id": "M2",
+      "file": "src/first-look.ts",
+      "anchor": "const ok = verifySignature(note.value, state.signature, state.publicKey);",
+      "replace": "const ok = verifySignature(note.value, state.signature, state.publicKey) && false;",
+      "test": "sign, then check: the untouched note is accepted",
+      "kind": "browser",
+      "why": "a check that rejects everything still shows REJECTED after the tamper",
+      "observed": "KILLED",
+      "baselinePassed": true,
+      "bundleBefore": "6affe46055fedffcf3929efce31ce8551c121d16d9d55c1a46e9feecb961d2b0",
+      "bundleMutated": "48c82ff0302670626d465d74c16c9e5e6d1d858753c08a76ff69205c99a0df94",
+      "exitCode": 1
+    },
+    {
+      "id": "M3",
+      "file": "src/first-look.ts",
+      "anchor": "    note.value = flip.changed;",
+      "replace": "    // mutation: compute the flip and never apply it",
+      "test": "change one character and the same signature is rejected",
+      "kind": "browser",
+      "why": "the tamper button could appear to work while changing nothing",
+      "observed": "KILLED",
+      "baselinePassed": true,
+      "bundleBefore": "6affe46055fedffcf3929efce31ce8551c121d16d9d55c1a46e9feecb961d2b0",
+      "bundleMutated": "ab39773c50298e858a0efc18a1012f9a34bc394cd7471b2959c818388c17d84c",
+      "exitCode": 1
+    },
+    {
+      "id": "M4",
+      "file": "src/first-look.ts",
+      "anchor": "    return { changed: note.slice(0, i) + swapped + note.slice(i + 1), from: ch, to: swapped };",
+      "replace": "    return { changed: note.toUpperCase(), from: ch, to: swapped };",
+      "test": "changes exactly one character and only its case",
+      "kind": "unit",
+      "why": "rewriting the whole note still rejects, and stops making the point about exact bytes",
+      "observed": "KILLED",
+      "baselinePassed": true,
+      "bundleBefore": "6affe46055fedffcf3929efce31ce8551c121d16d9d55c1a46e9feecb961d2b0",
+      "bundleMutated": "1b46862ef5860b4ffef80d6d9161997b322779a5ab0afd92516f58191bf2258a",
+      "exitCode": 1
+    },
+    {
+      "id": "M5",
+      "file": "index.html",
+      "anchor": "<details class=\"first-look-bytes\">",
+      "replace": "<details class=\"first-look-bytes\" open>",
+      "test": "no hex is on screen until the reader asks for it",
+      "kind": "browser",
+      "why": "the section is for readers who have not met hex yet",
+      "observed": "KILLED",
+      "baselinePassed": true,
+      "bundleBefore": "6affe46055fedffcf3929efce31ce8551c121d16d9d55c1a46e9feecb961d2b0",
+      "bundleMutated": "b6f6b5ffc630b8ebaba98f2bfe2c0655aac00b3256de8cd16d8ba272682927aa",
+      "exitCode": 1
+    }
+  ]
+}

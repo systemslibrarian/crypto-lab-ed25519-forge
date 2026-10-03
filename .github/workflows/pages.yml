@@ -31,8 +31,15 @@ jobs:
       - run: npm run build
       - name: Install Playwright browser
         run: npx playwright install --with-deps chromium
-      - name: Accessibility gate (axe-core, WCAG A/AA)
+      - name: Accessibility gate (axe-core, WCAG A/AA), and the front-section verdicts
         run: npm run test:a11y
+      # Five source patches that MUST turn a named test red: a check that always
+      # accepts, one that always rejects, a tamper button that changes nothing, a
+      # tamper that rewrites the whole note, and the byte panel opened by default.
+      # Each asserts the unmutated baseline passed and the built bundle hash moved,
+      # because a mutation that failed to apply looks exactly like one nothing caught.
+      - name: Prove the front-section's verdicts are detected (4.1c)
+        run: npm run test:mutations
       - uses: actions/upload-pages-artifact@v5
         with:
           path: dist

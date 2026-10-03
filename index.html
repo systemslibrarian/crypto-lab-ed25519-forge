@@ -162,6 +162,71 @@
             </aside>
           </header>
 
+          <section class="first-look" id="first-look" aria-labelledby="first-look-h">
+            <h2 id="first-look-h">Start here: sign a note, then change it</h2>
+            <p class="first-look-lead">
+              A signature proves two things at once: that a note came from you, and that nobody has
+              altered it since. You need no mathematics to watch that happen — three buttons, in order.
+              Everything here runs real Ed25519 in your browser; the only thing being hidden is the
+              notation.
+            </p>
+
+            <ol class="first-look-steps">
+              <li class="first-look-step">
+                <h3><span class="first-look-num" aria-hidden="true">1</span>Make a pair of keys</h3>
+                <p>
+                  One key stays secret and does the signing. The other is public — you can hand it to
+                  anyone, and it only lets them <em>check</em> a signature, never make one.
+                </p>
+                <button id="fl-keys" type="button">Make a pair of keys</button>
+                <p id="fl-keys-status" class="first-look-status" role="status" aria-live="polite">No keys yet.</p>
+              </li>
+
+              <li class="first-look-step">
+                <h3><span class="first-look-num" aria-hidden="true">2</span>Sign a note</h3>
+                <label for="fl-note">Your note</label>
+                <input id="fl-note" type="text" value="Meet me at the library at four." autocomplete="off" spellcheck="false" />
+                <button id="fl-sign" type="button" disabled>Sign this note</button>
+                <p id="fl-sign-status" class="first-look-status" role="status" aria-live="polite">Nothing signed yet.</p>
+              </li>
+
+              <li class="first-look-step">
+                <h3><span class="first-look-num" aria-hidden="true">3</span>Check it — then change one character</h3>
+                <p>
+                  Checking uses only the public key and the note. Then change a single letter and check
+                  again: the note still reads the same, and the check no longer passes.
+                </p>
+                <div class="first-look-actions">
+                  <button id="fl-check" type="button" disabled>Check the note</button>
+                  <button id="fl-tamper" type="button" disabled>Change one character, then check</button>
+                </div>
+                <p id="fl-verdict" class="first-look-verdict" data-verdict="none" role="status" aria-live="polite">Sign a note first.</p>
+              </li>
+            </ol>
+
+            <details class="first-look-bytes">
+              <summary>Show the actual bytes</summary>
+              <p class="first-look-bytes-note">
+                These are the real values the steps above produced. The panels below work with them
+                directly.
+              </p>
+              <div class="first-look-byte-row">
+                <span class="first-look-byte-label">Public key</span>
+                <output id="fl-bytes-public" class="mono block scroll" tabindex="0">-</output>
+              </div>
+              <div class="first-look-byte-row">
+                <span class="first-look-byte-label">Signature</span>
+                <output id="fl-bytes-signature" class="mono block scroll" tabindex="0">-</output>
+              </div>
+            </details>
+
+            <p class="first-look-next">
+              The three panels below are these same three steps with the bytes on show, and after them
+              the lab goes further: deterministic nonces, and the cofactor-8 edge case where two
+              correct libraries disagree about the same signature.
+            </p>
+          </section>
+
           <section class="panel-grid" aria-label="Ed25519 workflow: generate, sign, verify">
             <article class="panel" id="panel-key-forge" aria-labelledby="panel-key-forge-h">
               <h2 id="panel-key-forge-h"><span class="step-badge" aria-hidden="true">1</span>Key Forge</h2>
