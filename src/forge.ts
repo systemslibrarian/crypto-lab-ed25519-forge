@@ -30,10 +30,14 @@ export function generateKeypair(): Keypair {
 }
 
 export type ScalarMultStep = {
-	/** The step counter after this operation. */
+	/** Number of displayed double/add operations; a summary does not increment it. */
 	index: number;
-	/** 'double' or 'add' — the double-and-add operation just performed. */
-	op: 'start' | 'double' | 'add';
+	/** A summary jumps over undisplayed arithmetic; it is not a group operation. */
+	op: 'start' | 'double' | 'add' | 'summary';
+	/** Exact compressed group point; nx/ny below are approximate plotting values. */
+	pointHex: string;
+	skippedBits: number;
+	remainingOperations: number;
 	/** Normalized affine coordinates in [0, 1) for plotting (x/p, y/p). */
 	nx: number;
 	ny: number;
@@ -44,22 +48,26 @@ export type ScalarMultStep = {
 /**
  * Produces a REAL double-and-add walk of [scalar]·G on the actual Ed25519
  * group, for the animated scalar-multiplication visual. Nothing here is faked:
- * `scalar` is the genuine clamped scalar derived from the seed (the same value
- * @noble uses internally), and every returned point is a true group element
+ * The bit walk uses the unreduced, little-endian clamped SHA-512 head derived
+ * from the seed. Noble's separate scalar is reduced modulo L, which gives the
+ * same public point but a different bit sequence. Every point is a group element
  * computed with noble's point arithmetic. The final point equals the public key.
  *
  * To keep the animation short and legible we walk the top `bits` bits of the
- * scalar (a coarse but honest prefix of the real double-and-add ladder); the
- * caller then jumps to the exact public point as the final frame, so the walk
- * always terminates on the true key.
+ * scalar after its leading bit; a distinct summary frame reports the omitted
+ * operations before jumping to the exact public point. A full walk has no jump.
  *
  * @param privateKey 32-byte seed.
- * @param bits       How many high bits of the scalar to animate (coarse walk).
+ * @param bits       Bits after leading bit 254 to walk, an integer from 0 to 254.
  */
 export function scalarMultPath(privateKey: Uint8Array, bits = 12): ScalarMultStep[] {
-	const { scalar } = ed25519.utils.getExtendedPublicKey(privateKey);
+	if (!Number.isInteger(bits) || bits < 0 || bits > 254) {
+		throw new RangeError('Prefix length must be an integer from 0 to 254');
+	}
+	const { head, scalar: reducedScalar } = ed25519.utils.getExtendedPublicKey(privateKey);
+	const scalar = Array.from(head).reduceRight((n, b) => (n << 8n) | BigInt(b), 0n);
 	const p = ed25519.Point.Fp.ORDER;
-	const publicPoint = ed25519.Point.BASE.multiplyUnsafe(scalar);
+	const publicPoint = ed25519.Point.BASE.multiplyUnsafe(reducedScalar);
 
 	// The clamped Ed25519 scalar always has bit 254 set, so the ladder's leading
 	// bit is deterministic. Walk from the most-significant bit downward.
@@ -71,6 +79,9 @@ export function scalarMultPath(privateKey: Uint8Array, bits = 12): ScalarMultSte
 		return {
 			index,
 			op,
+			pointHex: Array.from(point.toBytes(), b => b.toString(16).padStart(2, '0')).join(''),
+			skippedBits: 0,
+			remainingOperations: 0,
 			nx: Number(x % p) / Number(p),
 			ny: Number(y % p) / Number(p),
 			isFinal: false,
@@ -94,11 +105,17 @@ export function scalarMultPath(privateKey: Uint8Array, bits = 12): ScalarMultSte
 		}
 	}
 
-	// Final frame: the true public point. (The coarse walk above shows the
-	// mechanism; this guarantees the animation lands on the real key.)
-	const finalStep = norm(publicPoint, index + 1, 'add');
-	finalStep.isFinal = true;
-	steps.push(finalStep);
+	if (lastBit > 0) {
+		const summary = norm(publicPoint, index, 'summary');
+		summary.skippedBits = lastBit;
+		for (let bit = lastBit - 1; bit >= 0; bit--) {
+			summary.remainingOperations += 1 + Number((scalar >> BigInt(bit)) & 1n);
+		}
+		summary.isFinal = true;
+		steps.push(summary);
+	} else {
+		steps[steps.length - 1].isFinal = true;
+	}
 	return steps;
 }
 

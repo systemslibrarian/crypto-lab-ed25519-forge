@@ -136,9 +136,9 @@ describe('scalarMultPath (animated [scalar]·G walk — must be REAL points)', (
     const final = path[path.length - 1];
     expect(final.isFinal).toBe(true);
 
-    // Recompute the public point from the real clamped scalar and confirm the
-    // final animation frame's normalized coordinates match it exactly. This
-    // proves the visual is not faked — it plots genuine group elements.
+    // Noble's scalar is reduced modulo L. It gives the same public point as
+    // the clamped head, so this checks the approximate endpoint coordinates.
+    // scalar-animation.test.ts separately checks the actual clamped bit walk.
     const { scalar } = ed25519.utils.getExtendedPublicKey(kp.privateKey);
     const pub = ed25519.Point.BASE.multiplyUnsafe(scalar).toAffine();
     const p = ed25519.Point.Fp.ORDER;
