@@ -286,7 +286,8 @@ export function mountApp(): void {
 
     const label = (s: (typeof path)[number]): string => {
       if (s.op === 'start') return `Step 0: start at base point G.`;
-      if (s.isFinal) return `Done: landed on the public point [scalar]·G after ${s.index} operations.`;
+      if (s.op === 'summary') return `Summary: exact public point [scalar]·G. ${s.index} double/add operations displayed; ${s.remainingOperations} remaining operations across ${s.skippedBits} bits skipped. Endpoint jump, not an add G.`;
+      if (s.isFinal) return `Done: full clamped-scalar walk reached [scalar]·G after ${s.index} double/add operations.`;
       return `Step ${s.index}: ${s.op === 'double' ? 'double (×2)' : 'add G'} — a real point on the group.`;
     };
 

@@ -11,8 +11,8 @@
       "why": "a check that accepts everything still shows ACCEPTED on an untouched note",
       "observed": "KILLED",
       "baselinePassed": true,
-      "bundleBefore": "43dc998656511139dfc035421a4ff73674b146d1c3d9ab8c981339bad77800b5",
-      "bundleMutated": "c90265766130fc4d0966d55adae8d27c8c2ec50a8cf359741ef4ad967b04d432",
+      "bundleBefore": "b334c1c15f61c9f9cbd6e664f08efc88f0ca48d1baa9f9945fa8fee6d9721f98",
+      "bundleMutated": "0baee97543bdce73a032ce34dbf8a1f70bfcda180e692ddcd1d3967896b19958",
       "exitCode": 1
     },
     {
@@ -25,8 +25,8 @@
       "why": "a check that rejects everything still shows REJECTED after the tamper",
       "observed": "KILLED",
       "baselinePassed": true,
-      "bundleBefore": "43dc998656511139dfc035421a4ff73674b146d1c3d9ab8c981339bad77800b5",
-      "bundleMutated": "d35112697550e00983f700745f53390ed5d1466f00acc42cb088db10b77d2b5f",
+      "bundleBefore": "b334c1c15f61c9f9cbd6e664f08efc88f0ca48d1baa9f9945fa8fee6d9721f98",
+      "bundleMutated": "5354efb6b0ad0df2de1cfe2b9a5694e76c8676dd0458d065d70a6efac6700e56",
       "exitCode": 1
     },
     {
@@ -39,8 +39,8 @@
       "why": "the tamper button could appear to work while changing nothing",
       "observed": "KILLED",
       "baselinePassed": true,
-      "bundleBefore": "43dc998656511139dfc035421a4ff73674b146d1c3d9ab8c981339bad77800b5",
-      "bundleMutated": "3f34e72ce7bdb08cd9c39057bbe3be9e7356d2ea6293f55c1f0c8faffbf1ddca",
+      "bundleBefore": "b334c1c15f61c9f9cbd6e664f08efc88f0ca48d1baa9f9945fa8fee6d9721f98",
+      "bundleMutated": "02e50a080b0ff08e5ebeb84ecb19d3ada74756631617508ebcb815b2a734ab1d",
       "exitCode": 1
     },
     {
@@ -53,8 +53,8 @@
       "why": "rewriting the whole note still rejects, and stops making the point about exact bytes",
       "observed": "KILLED",
       "baselinePassed": true,
-      "bundleBefore": "43dc998656511139dfc035421a4ff73674b146d1c3d9ab8c981339bad77800b5",
-      "bundleMutated": "e6ee2aef35afcb1be120a0f0454c8ee3b523f2e9c554da6d12c5beda277240cd",
+      "bundleBefore": "b334c1c15f61c9f9cbd6e664f08efc88f0ca48d1baa9f9945fa8fee6d9721f98",
+      "bundleMutated": "bc87282b46a19bf49d0c5c077057837529013636b70d1e57f0e773b6f9f0740c",
       "exitCode": 1
     },
     {
@@ -67,8 +67,8 @@
       "why": "the section is for readers who have not met hex yet",
       "observed": "KILLED",
       "baselinePassed": true,
-      "bundleBefore": "43dc998656511139dfc035421a4ff73674b146d1c3d9ab8c981339bad77800b5",
-      "bundleMutated": "bd1affc60ee2ad3d3f07566e4a023bec7c0e424739b7a9fe672b446ed91b175b",
+      "bundleBefore": "b334c1c15f61c9f9cbd6e664f08efc88f0ca48d1baa9f9945fa8fee6d9721f98",
+      "bundleMutated": "54830bb7a3a4451b3944167e1507d9070fa69e5aae18b277446c79c2c4013363",
       "exitCode": 1
     }
   ]

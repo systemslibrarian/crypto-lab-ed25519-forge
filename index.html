@@ -234,18 +234,18 @@
               <div class="field-stack">
                 <label for="private-key-display">Private Key (truncated hex)</label>
                 <output id="private-key-display" class="mono block" aria-live="off">-</output>
-                <small>32-byte private scalar — never fully displayed in UI</small>
+                <small>32-byte private seed — never fully displayed in UI</small>
               </div>
               <div class="field-stack">
                 <label for="public-key-display">Public Key (hex)</label>
                 <output id="public-key-display" class="mono block" aria-live="off">-</output>
                 <button id="copy-public-key" type="button" disabled>Copy Public Key</button>
-                <small>32-byte private scalar → 32-byte compressed point on Curve25519</small>
+                <small>32-byte seed → SHA-512 and pruning → 32-byte compressed public point</small>
               </div>
               <div class="field-stack scalarmult" id="scalarmult-box">
-                <span class="scalarmult-title">public key = [scalar]·G</span>
-                <p class="scalarmult-lead">The public key is the base point <strong>G</strong> added to itself <em>scalar</em> times. Watch a coarse double-and-add walk that mechanical multiplication on the real Ed25519 group (order shown, not to scale).</p>
-                <canvas id="scalarmult-canvas" width="320" height="200" role="img" aria-label="Animated scalar multiplication: the fixed base point G is repeatedly doubled and added, lighting up successive points on the Ed25519 group until it reaches the public point.">Your browser does not support canvas.</canvas>
+                <span class="scalarmult-title">public key = [clamped scalar]·G</span>
+                <p class="scalarmult-lead">The seed's clamped SHA-512 prefix is interpreted little-endian. Watch the leading bit and next 12 bits as real double/add operations, then a labelled summary skips the remaining arithmetic and jumps to the exact public point. The endpoint jump is not an add G; plotted coordinates are approximate.</p>
+                <canvas id="scalarmult-canvas" width="320" height="200" role="img" aria-label="Scalar multiplication prefix: real doubles and additions, followed by a separate summary jump over omitted operations to the public point.">Your browser does not support canvas.</canvas>
                 <p id="scalarmult-status" class="scalarmult-status" role="status" aria-live="polite">Generate a keypair to walk [scalar]·G.</p>
               </div>
             </article>
@@ -348,7 +348,7 @@ x₃ = ─────────────────    y₃ = ───�
       1 + d·x₁x₂y₁y₂            1 − d·x₁x₂y₁y₂
 
 one formula · all inputs · no exceptions</pre>
-              <p class="math-note">See scalar multiplication itself animate in the <strong>Key Forge</strong> panel: each step is one double-and-add on this same group.</p>
+              <p class="math-note">The <strong>Key Forge</strong> animation follows the clamped SHA-512 prefix as a little-endian integer. Each displayed arithmetic step doubles or adds G; after the leading bit and next 12 bits, a labelled summary skips the remaining operations and jumps to the exact public key. That jump is not an add G. Plot coordinates are approximate; this teaching walk is not the signing library's execution trace.</p>
             </div>
             <div id="tab-3" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-3" tabindex="0" hidden>
               <h3>Pitfalls & ZIP215</h3>
