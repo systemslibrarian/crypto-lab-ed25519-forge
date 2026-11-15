@@ -671,7 +671,7 @@ export function mountApp(): void {
 
       announce(
         `Cofactor demo: ZIP215 ${forgery.zip215Valid ? 'accepts' : 'rejects'}, ` +
-          `strict RFC 8032 ${forgery.strictValid ? 'accepts' : 'rejects'} the same bytes.`,
+          `noble strict mode (zip215: false) ${forgery.strictValid ? 'accepts' : 'rejects'} the same bytes.`,
       );
     });
   }

@@ -167,8 +167,8 @@ describe('scalarMultPath (animated [scalar]·G walk — must be REAL points)', (
   });
 });
 
-describe('cofactor / small-subgroup malleability (ZIP215 vs strict RFC 8032)', () => {
-  it('forges a signature that ZIP215 accepts but strict RFC 8032 rejects, for every torsion point', () => {
+describe('cofactor / small-subgroup malleability (ZIP215 vs noble strict mode)', () => {
+  it('forges a signature that ZIP215 accepts but noble strict mode (zip215: false) rejects, for every torsion point', () => {
     for (let variant = 1; variant <= 7; variant++) {
       const forgery = forgeCofactorSignature('I never signed this', variant);
       expect(forgery.publicKey).toHaveLength(32);
@@ -186,6 +186,25 @@ describe('cofactor / small-subgroup malleability (ZIP215 vs strict RFC 8032)', (
     // Multiplying a torsion point by the cofactor 8 yields the identity.
     expect(A.isSmallOrder()).toBe(true);
     expect(A.multiplyUnsafe(8n).is0()).toBe(true);
+  });
+
+  it('the strict REJECTS is the small-order check, not a decoding failure: every torsion key decodes in strict mode and satisfies the cofactored equation', () => {
+    // The README attributes the strict verdict to noble's extra `A.isSmallOrder()`
+    // gate rather than to RFC 8032 / FIPS 186-5 decoding rules. Pin that: strict
+    // (zip215: false) decoding of the key and R must succeed, and the cofactored
+    // equation the standards specify must hold on its own.
+    for (let variant = 1; variant <= 7; variant++) {
+      const forgery = forgeCofactorSignature('I never signed this', variant);
+      const A = ed25519.Point.fromBytes(forgery.publicKey, false);
+      const R = ed25519.Point.fromBytes(forgery.signature.subarray(0, 32), false);
+      expect(A.isSmallOrder()).toBe(true);
+      // R = [S]·B by construction, so R − [S]·B = 0 and the cofactored equation
+      // [8]·(R + [k]·A − [S]·B) = [8]·[k]·A = 0 holds for ANY k.
+      const sBytes = forgery.signature.subarray(32, 64);
+      const s = Array.from(sBytes).reduceRight((n, b) => (n << 8n) | BigInt(b), 0n);
+      expect(R.subtract(ed25519.Point.BASE.multiplyUnsafe(s)).is0()).toBe(true);
+      expect(A.clearCofactor().is0()).toBe(true);
+    }
   });
 
   it('the forgery is NOT accepted when the public key is a real (prime-order) key', () => {

@@ -352,7 +352,7 @@ one formula · all inputs · no exceptions</pre>
             </div>
             <div id="tab-3" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-3" tabindex="0" hidden>
               <h3>Pitfalls & ZIP215</h3>
-              <p class="plain-framing">In plain terms: a signature is supposed to prove that someone holding the secret key really signed this exact message. A specially chosen <em>fake</em> public key can break that promise — for some verifiers but not others. Below, you can watch two <strong>correct, spec-following</strong> libraries look at the identical bytes and <strong>disagree</strong> on whether they are valid. That disagreement is the whole pitfall.</p>
+              <p class="plain-framing">In plain terms: a signature is supposed to prove that someone holding the secret key really signed this exact message. A specially chosen <em>fake</em> public key can break that promise — for some verifiers but not others. Below, you can watch one library, <strong>@noble/curves</strong>, in two <strong>verification modes</strong> look at the identical bytes and <strong>disagree</strong> on whether they are valid. That disagreement is the whole pitfall.</p>
               <p>Before ZIP215-aligned behavior, signature acceptance around edge cases and cofactor clearing could vary by library, enabling practical malleability and consensus disagreement risks. Verifying the same signature in two different libraries could produce conflicting outcomes. Monero was impacted by this class of ambiguity. ZIP215 standardized consensus-safe verification behavior so implementations agree. Reference: <a href="https://zips.z.cash/zip-0215" target="_blank" rel="noreferrer">ZIP-0215</a>.</p>
 
               <dl class="glossary">
@@ -385,10 +385,10 @@ one formula · all inputs · no exceptions</pre>
                   </div>
                 </div>
                 <div class="cofactor-verdicts">
-                  <div id="cofactor-zip215" class="cofactor-verdict neutral"><span class="cofactor-rule">ZIP215 (noble default, cofactored)</span><span class="cofactor-result">—</span></div>
-                  <div id="cofactor-strict" class="cofactor-verdict neutral"><span class="cofactor-rule">Strict RFC 8032 / FIPS 186-5</span><span class="cofactor-result">—</span></div>
+                  <div id="cofactor-zip215" class="cofactor-verdict neutral"><span class="cofactor-rule">ZIP215 (noble default)</span><span class="cofactor-result">—</span></div>
+                  <div id="cofactor-strict" class="cofactor-verdict neutral"><span class="cofactor-rule">Strict mode (noble { zip215: false })</span><span class="cofactor-result">—</span></div>
                 </div>
-                <p id="cofactor-explain" class="cofactor-explain">The same bytes: accepted by one rule, rejected by the other. This is real — run it and inspect the two outputs. It also shows why systems that treat signatures as unique IDs must reject small-order keys.</p>
+                <p id="cofactor-explain" class="cofactor-explain">The same bytes: accepted by one rule, rejected by the other. This is real — run it and inspect the two outputs. Both rules check the cofactored equation above; the strict REJECTS comes from an extra check the library adds in that mode — it refuses any small-order public key — which RFC 8032 §5.1.7 and FIPS 186-5 §7.7 do not themselves require (NIST places that check in SP 800-186 Appendix D.1.3.2 public-key validation instead). It also shows why systems that treat signatures as unique IDs must reject small-order keys.</p>
               </div>
             </div>
             <div id="tab-4" class="tab-panel" role="tabpanel" aria-labelledby="tab-btn-4" tabindex="0" hidden>

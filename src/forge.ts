@@ -14,7 +14,7 @@ export type CofactorForgery = {
 	messageBytes: Uint8Array;
 	/** Result under noble's default (ZIP215, cofactored) verification — accepts. */
 	zip215Valid: boolean;
-	/** Result under strict RFC 8032 / NIST 186-5 verification — rejects. */
+	/** Result under noble's strict mode ({ zip215: false }), which adds a small-order public-key check — rejects. */
 	strictValid: boolean;
 };
 
@@ -153,15 +153,20 @@ export function tamperSignature(signature: Uint8Array): Uint8Array {
  * NON-identity torsion point as the "public key" A. Because A is small-order,
  * [8]·A = 0, so it vanishes from the *cofactored* verification equation
  *   [8]·(R + [k]·A − [S]·B) == 0
- * that noble uses by default (ZIP215, consensus-critical). We can therefore hand
+ * that RFC 8032 §5.1.7, FIPS 186-5 §7.7 and ZIP215 all specify and that noble
+ * checks in BOTH of its modes (ZIP215 is the default). We can therefore hand
  * it a signature we NEVER produced with a secret key: pick a scalar S, set
  * R = [S]·B, and the equation collapses to [8]·[k]·A = 0, which holds for any
  * message. ZIP215 verification ACCEPTS it.
  *
- * Strict RFC 8032 / NIST FIPS 186-5 verification (noble's `{ zip215: false }`)
- * explicitly REJECTS small-order public keys, so it returns false. The same
- * bytes, verified two legitimate ways, disagree — exactly the cross-library
- * ambiguity that affected Monero and motivated ZIP-0215.
+ * Noble's strict mode (`{ zip215: false }`) REJECTS it — not because RFC 8032
+ * §5.1.7 or FIPS 186-5 §7.7 say so (both only decode, range-check S and test
+ * the cofactored equation, which this forgery satisfies), but because noble
+ * adds an explicit `A.isSmallOrder()` check in strict mode, beyond those
+ * standards. The torsion points used here are canonically encoded, so decoding
+ * succeeds in both modes and that one check flips the verdict. The same bytes,
+ * verified two legitimate ways, disagree — exactly the cross-library ambiguity
+ * that affected Monero and motivated ZIP-0215.
  *
  * This forges nothing about a real key holder; it shows that accepting
  * small-order keys makes a "signature" a meaningless artifact.
