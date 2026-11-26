@@ -442,7 +442,9 @@ export function mountApp(): void {
     refreshButtons();
   });
 
+  let verificationRevision = 0;
   verifyButton.addEventListener('click', async () => {
+    const revision = verificationRevision;
     const pub = parseHex(verifyPublicKeyInput.value);
     const sig = parseHex(verifySignatureInput.value);
     const msg = verifyMessageInput.value;
@@ -455,6 +457,7 @@ export function mountApp(): void {
 
     try {
       const { verifySignature } = await loadForge();
+      if (revision !== verificationRevision) return;
       const valid = verifySignature(msg, sig, pub);
       signatureDisplay.innerHTML = toSignatureHtml(sig);
       if (valid) {
@@ -463,6 +466,7 @@ export function mountApp(): void {
         setResult('INVALID', 'Signature does not match the supplied message/public key.');
       }
     } catch {
+      if (revision !== verificationRevision) return;
       setResult('INVALID', 'Verification failed: invalid key or signature format.');
     }
     refreshButtons();
@@ -580,14 +584,22 @@ export function mountApp(): void {
     }
   });
 
+  function verificationInputsChanged(): void {
+    verificationRevision++;
+    refreshButtons();
+    if (verifyResult?.classList.contains('valid') || verifyResult?.classList.contains('invalid')) {
+      setResult('NEUTRAL', 'Inputs changed. Verify the current message, key and signature.');
+    }
+  }
+
   signMessageInput.addEventListener('input', () => {
     verifyMessageInput.value = signMessageInput.value;
-    refreshButtons();
+    verificationInputsChanged();
   });
 
-  verifyPublicKeyInput.addEventListener('input', refreshButtons);
-  verifyMessageInput.addEventListener('input', refreshButtons);
-  verifySignatureInput.addEventListener('input', refreshButtons);
+  verifyPublicKeyInput.addEventListener('input', verificationInputsChanged);
+  verifyMessageInput.addEventListener('input', verificationInputsChanged);
+  verifySignatureInput.addEventListener('input', verificationInputsChanged);
 
   // Warm the crypto chunk on first hint of intent (hover/focus) so the first
   // click resolves with no perceptible delay, while keeping it off page load.
