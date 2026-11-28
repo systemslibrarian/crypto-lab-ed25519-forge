@@ -8,8 +8,8 @@ Ed25519 Forge is an interactive browser demo of Ed25519 keypair generation, mess
 
 - **SSH authentication keys** — Ed25519 has been supported by OpenSSH since 6.5 (2014) and is the `ssh-keygen` default since 9.5 (2023), offering short keys (32-byte public) and fast operations compared to RSA.
 - **Protocol message signing with compact signatures** — At 64 bytes per signature with no DER overhead, Ed25519 is well-suited for bandwidth- or storage-constrained protocols like TLS 1.3.
-- **Systems requiring deterministic signature output** — Because the nonce is derived from key + message, the same inputs always produce the same signature, simplifying testing and eliminating RNG-dependent failure modes.
-- **High-throughput verification workloads** — Ed25519 verification is roughly 2x faster than P-256 ECDSA in practice, making it a strong choice for systems verifying many signatures.
+- **Systems requiring deterministic signature output** — Correct Ed25519 signing derives its nonce from secret material and the message, so it needs no fresh randomness for each signature. Key generation still requires secure randomness. Determinism alone gives no protection against implementation faults or side-channel leakage. [RFC 8032 §§5.1.5–5.1.6 and §8](https://www.rfc-editor.org/rfc/rfc8032.html#section-5.1.5).
+- **High-throughput verification workloads** — Verification throughput depends on the implementation, hardware and workload. This lab provides no paired P-256 timing from which to infer a speed ratio.
 - **Do NOT use Ed25519 for key agreement or encryption** — Ed25519 is a signature scheme; for Diffie-Hellman key exchange on the same curve family, use X25519 instead.
 - Do NOT treat this as production code — it is a browser teaching demo, not a hardened signing library.
 
